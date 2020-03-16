@@ -4,10 +4,9 @@
 #include <numeric>
 #include <random>
 
-// y = [1, 4, 5, 3, 0, 4, 10, 6, 9, 10]
-
 // Cities 1 ((2 + 3 + 0 + 9 + 1 + 9 + 9 + 7) % 5 = 0)
 // x = [0, 3, 6, 7, 15, 12, 14, 9, 7, 0]
+// y = [1, 4, 5, 3, 0, 4, 10, 6, 9, 10]
 
 typedef std::array<uint32_t, 10> array;
 
