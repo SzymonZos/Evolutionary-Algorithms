@@ -16,12 +16,12 @@ typedef std::array<double, noCities> arrayDbl;
 typedef std::array<int32_t, 2> vec;
 
 template <typename T>
-double AxisSquared(const T& x) {
+double AxisSquared(T&& x) {
     return (x[0] - x[1]) * (x[0] - x[1]);
 }
 
 template <typename T>
-double Distance(const T& x, const T& y) {
+double Distance(T&& x, T&& y) {
     return std::sqrt(AxisSquared(x) + AxisSquared(y));
 }
 
@@ -180,7 +180,7 @@ int main() {
             tmp = child[mutatingGen_1];
             child[mutatingGen_1] = child[mutatingGen_2];
             child[mutatingGen_2] = tmp;
-            std::cout << "AFTER MUTATION: " << child << std::endl;
+            std::cout << "AFTER MUTATION:  " << child << std::endl;
             mutationCount++;
         }
     }
