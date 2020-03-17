@@ -1,48 +1,28 @@
 #include <iostream>
 #include <array>
-#include <algorithm>
-#include <numeric>
 #include <random>
-#include <cmath>
 #include "Operators.hpp"
+#include "Math.hpp"
+#include "Algorithm.hpp"
+
 // Cities 1 ((2 + 3 + 0 + 9 + 1 + 9 + 9 + 7) % 5 = 0)
 // x = [0, 3, 6, 7, 15, 12, 14, 9, 7, 0]
 // y = [1, 4, 5, 3, 0, 4, 10, 6, 9, 10]
 
-const std::size_t noCities = 10;
+constexpr std::size_t noCities = 10;
 
 typedef std::array<int32_t, noCities> arrayInt;
 typedef std::array<double, noCities> arrayDbl;
-typedef std::array<int32_t, 2> vec;
 
-template <typename T>
-double AxisSquared(T&& x) {
-    return (x[0] - x[1]) * (x[0] - x[1]);
-}
-
-template <typename T>
-double Distance(T&& x, T&& y) {
-    return std::sqrt(AxisSquared(x) + AxisSquared(y));
-}
-
-std::array<arrayDbl, noCities> CalculateDistanceMatrix(arrayInt x, arrayInt y) {
-    std::array<arrayDbl, noCities> distanceMatrix = {};
+template<typename Input, typename Output>
+constexpr Output CalculateDistanceMatrix(const Input& x, const Input& y) {
+    Output distanceMatrix = {};
     for (std::size_t i = 0; i < noCities; i++) {
         for (std::size_t j = 0; j < noCities; j++) {
-            distanceMatrix[i][j] = Distance(vec{x[i], x[j]}, vec{y[i], y[j]});
+            distanceMatrix[i][j] = Distance(x[i], x[j], y[i], y[j]);
         }
     }
     return distanceMatrix;
-}
-
-template<typename InputIterator, typename OutputIterator, typename Predicate>
-void CopyIfOutput(InputIterator first, InputIterator last,
-                  OutputIterator result, Predicate predicate) {
-    for (; first != last; ++first, ++result) {
-        if (predicate(*result)) {
-            *result = *first;
-        }
-    }
 }
 
 template<typename T>
@@ -82,14 +62,13 @@ void CalculateCostValue(popType population, std::array<arrayDbl, noCities> dista
 int main() {
     constexpr std::size_t noParents = 250;
     constexpr double n = 0.8; // need a better name for this variable
-    const double pm = 0.2; // need a better name for this variable
-    const std::size_t tMax = 1000;
+    constexpr double pm = 0.2; // need a better name for this variable
+    constexpr std::size_t tMax = 1000;
 
-    arrayInt x = {0, 3, 6, 7, 15, 12, 14, 9, 7, 0};
-    arrayInt y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
+    constexpr arrayInt x = {0, 3, 6, 7, 15, 12, 14, 9, 7, 0};
+    constexpr arrayInt y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
     arrayInt cities;
     std::iota(cities.begin(), cities.end(), 0);
-    std::cout << cities << std::endl << x << std::endl << y << std::endl;
 
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
@@ -100,7 +79,7 @@ int main() {
         std::cout << parent << std::endl;
     }
 
-    auto distanceMatrix = CalculateDistanceMatrix(x, y);
+    constexpr auto distanceMatrix = CalculateDistanceMatrix<arrayInt, std::array<arrayDbl, 10>>(x, y);
 
     for (auto& t : distanceMatrix) {
         std::cout << t << std::endl;
