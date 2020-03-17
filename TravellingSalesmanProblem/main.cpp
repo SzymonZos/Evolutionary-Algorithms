@@ -153,11 +153,11 @@ int main() {
     std::uniform_int_distribution<> intDistribution(0, 199);
     std::size_t indexOfParent_1 = 0;
     std::size_t indexOfParent_2 = 0;
-    for (std::size_t i=0; i<noChosenParents; i+=2){
+    for (std::size_t i = 0; i < noChosenParents; i += 2) {
         indexOfParent_1 = intDistribution(rng);
         indexOfParent_2 = intDistribution(rng);
-        offspring[i] = CrossoverParents(chosenParents[indexOfParent_1],chosenParents[indexOfParent_2]);
-        offspring[i+1] = CrossoverParents(chosenParents[indexOfParent_2],chosenParents[indexOfParent_1]);
+        offspring[i] = CrossoverParents(chosenParents[indexOfParent_1], chosenParents[indexOfParent_2]);
+        offspring[i + 1] = CrossoverParents(chosenParents[indexOfParent_2], chosenParents[indexOfParent_1]);
     }
     for (auto& child : offspring){
         std::cout << "OFFSPRING:" << child << std::endl;
@@ -165,21 +165,21 @@ int main() {
 
     double mutationProbability = 0.2;
     std::uniform_real_distribution<> probabilityDistribution(0.0, 1.0);
-    std::uniform_int_distribution<> mutationDistribution(0,9);
+    std::uniform_int_distribution<> mutationDistribution(0, 9);
     std::size_t mutatingGen_1 = 0;
     std::size_t mutatingGen_2 = 0;
-    std::size_t tmp=0;
-    std::size_t mutationCount=0;
+    std::size_t tmp = 0;
+    std::size_t mutationCount = 0;
     double mutationChance = 0.0;
-    for(auto& child : offspring){
+    for (auto& child : offspring){
         mutationChance = probabilityDistribution(rng);
-        if(mutationChance<mutationProbability){
+        if (mutationChance < mutationProbability) {
             std::cout << "BEFORE MUTATION: " << child << std::endl;
             mutatingGen_1 = mutationDistribution(rng);
             mutatingGen_2 = mutationDistribution(rng);
-            tmp=child[mutatingGen_1];
-            child[mutatingGen_1]=child[mutatingGen_2];
-            child[mutatingGen_2]=tmp;
+            tmp = child[mutatingGen_1];
+            child[mutatingGen_1] = child[mutatingGen_2];
+            child[mutatingGen_2] = tmp;
             std::cout << "AFTER MUTATION: " << child << std::endl;
             mutationCount++;
         }
@@ -192,6 +192,19 @@ int main() {
         std::cout << "Cost value is: " << cost << std::endl;
     }
 
-
+    std::array<arrayInt, noParents> newPopulation = population;
+    int noChangedCasesDebug=0;
+    for (std::size_t i=0; i<noChosenParents; i++){
+        auto maxCostPosition = std::distance(parentCostValues.begin(),
+                                             std::max_element(parentCostValues.begin(), parentCostValues.end()));
+        if(offspringCostValues[i]<parentCostValues[maxCostPosition]){
+            newPopulation[maxCostPosition]=offspring[i];
+            parentCostValues[maxCostPosition]=offspringCostValues[i];
+            noChangedCasesDebug++;
+        }
+    }
+    std::cout << noChangedCasesDebug << std::endl;
+    population=newPopulation;
+    /*teraz tylko zapetlic i algorytm gotowy kappa*/
     return 0;
 }
