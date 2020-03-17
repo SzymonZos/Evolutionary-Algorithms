@@ -138,13 +138,24 @@ int main() {
     for (const auto& parent : chosenParents)
         std::cout << parent << std::endl;
 
-    std::array<int32_t, 5> parent1 = {2, 4, 5, 1, 3};
-    std::array<int32_t, 5> parent2 = {1, 5, 4, 2, 3};
-
-    auto offspring1 = CrossoverParents(parent1, parent2);
-    auto offspring2 = CrossoverParents(parent2, parent1);
-
-    std::cout << offspring1 << " " << offspring2 << std::endl;
-
+//    std::array<int32_t, 5> parent1 = {2, 4, 5, 1, 3};
+//    std::array<int32_t, 5> parent2 = {1, 5, 4, 2, 3};
+//
+//    auto offspring1 = CrossoverParents(parent1, parent2);
+//    auto offspring2 = CrossoverParents(parent2, parent1);
+//
+//    std::cout << offspring1 << " " << offspring2 << std::endl;
+    std::array<arrayInt, noParents> offspring = {};
+    std::uniform_int_distribution<> intDistribution(0, 199);
+    std::size_t indexOfParent_1 = 0;
+    std::size_t indexOfParent_2 = 0;
+    for (auto& child : offspring){
+        indexOfParent_1 = intDistribution(rng);
+        indexOfParent_2 = intDistribution(rng);
+        child = CrossoverParents(chosenParents[indexOfParent_1],chosenParents[indexOfParent_2]);
+    }
+    for (auto child : offspring){
+        std::cout << "OFFSPRING:" << child << std::endl;
+    }
     return 0;
 }
