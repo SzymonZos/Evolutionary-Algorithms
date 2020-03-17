@@ -145,7 +145,7 @@ int main() {
 //    auto offspring2 = CrossoverParents(parent2, parent1);
 //
 //    std::cout << offspring1 << " " << offspring2 << std::endl;
-    std::array<arrayInt, noParents> offspring = {};
+    std::array<arrayInt, noChosenParents> offspring = {};
     std::uniform_int_distribution<> intDistribution(0, 199);
     std::size_t indexOfParent_1 = 0;
     std::size_t indexOfParent_2 = 0;
@@ -154,8 +154,33 @@ int main() {
         indexOfParent_2 = intDistribution(rng);
         child = CrossoverParents(chosenParents[indexOfParent_1],chosenParents[indexOfParent_2]);
     }
-    for (auto child : offspring){
+    for (auto& child : offspring){
         std::cout << "OFFSPRING:" << child << std::endl;
     }
+
+    double mutationProbability = 0.2;
+    std::uniform_real_distribution<> probabilityDistribution(0.0, 1.0);
+    std::uniform_int_distribution<> mutationDistribution(0,9);
+    std::size_t mutatingGen_1 = 0;
+    std::size_t mutatingGen_2 = 0;
+    std::size_t tmp=0;
+    std::size_t mutationCount=0;
+    double mutationChance = 0.0;
+    for(auto& child : offspring){
+        mutationChance = probabilityDistribution(rng);
+        if(mutationChance<mutationProbability){
+            std::cout << "BEFORE MUTATION: " << child << std::endl;
+            mutatingGen_1 = mutationDistribution(rng);
+            mutatingGen_2 = mutationDistribution(rng);
+            tmp=child[mutatingGen_1];
+            child[mutatingGen_1]=child[mutatingGen_2];
+            child[mutatingGen_2]=tmp;
+            std::cout << "AFTER MUTATION: " << child << std::endl;
+            mutationCount++;
+        }
+    }
+    std::cout << "Number of mutated: " << mutationCount << std::endl;
+
+
     return 0;
 }
