@@ -65,6 +65,18 @@ T CrossoverParents(const T& parent1, const T& parent2) {
 }
 
 
+template <typename popType, typename T>
+void CalculateCostValue(popType population, std::array<arrayDbl, noCities> distanceMatrix, T& calculatedCostValue){
+    std::size_t parentIndex = 0;
+    for (auto& parent : population) {
+        calculatedCostValue[parentIndex] += distanceMatrix[parent.front()][parent.back()];
+        for (std::size_t i = 0; i < noCities - 1; i++) {
+            calculatedCostValue[parentIndex] += distanceMatrix[parent[i]][parent[i + 1]];
+        }
+        parentIndex++;
+    }
+}
+
 //TODO: random init population template<class T, std::size_t size>
 
 int main() {
@@ -94,25 +106,16 @@ int main() {
         std::cout << t << std::endl;
     }
 
-    std::array<double, noParents> costValues = {};
-    std::size_t parentIndex = 0;
-
-    for (auto& parent : population) {
-        costValues[parentIndex] += distanceMatrix[parent.front()][parent.back()];
-        for (std::size_t i = 0; i < noCities - 1; i++) {
-            costValues[parentIndex] += distanceMatrix[parent[i]][parent[i + 1]];
-        }
-        parentIndex++;
-    }
-
-//    for (const auto& cost : costValues) {
+    std::array<double, noParents> parentCostValues = {};
+    CalculateCostValue(population, distanceMatrix, parentCostValues);
+//    for (const auto& cost : parentCostValues) {
 //        std::cout << "Cost value is: " << cost << std::endl;
 //    }
 
-    auto maxCost = std::max_element(costValues.begin(), costValues.end());
+    auto maxCost = std::max_element(parentCostValues.begin(), parentCostValues.end());
     std::cout << "max val is: " << *maxCost << std::endl;
     double ts = 0;
-    for (auto& cost : costValues){
+    for (auto& cost : parentCostValues){
         ts += *maxCost - cost;
     }
     std::cout << "ts is: " << ts << std::endl;
@@ -127,7 +130,7 @@ int main() {
     for (auto& chosenParent : chosenParents) {
         double randomNumber = realDistribution(rng);
         for (std::size_t i = 0; i < noParents; i++) {
-            ti += *maxCost - costValues[i];
+            ti += *maxCost - parentCostValues[i];
             if (ti >= randomNumber) {
                 chosenParent = population[i];
                 ti = 0;
@@ -182,6 +185,12 @@ int main() {
         }
     }
     std::cout << "Number of mutated: " << mutationCount << std::endl;
+
+    std::array<double, noChosenParents> offspringCostValues = {};
+    CalculateCostValue(population, distanceMatrix, offspringCostValues);
+    for (const auto& cost : offspringCostValues) {
+        std::cout << "Cost value is: " << cost << std::endl;
+    }
 
 
     return 0;
