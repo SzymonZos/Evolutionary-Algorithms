@@ -64,6 +64,7 @@ T CrossoverParents(const T& parent1, const T& parent2) {
     return offspring;
 }
 
+
 //TODO: random init population template<class T, std::size_t size>
 
 int main() {
@@ -149,10 +150,11 @@ int main() {
     std::uniform_int_distribution<> intDistribution(0, 199);
     std::size_t indexOfParent_1 = 0;
     std::size_t indexOfParent_2 = 0;
-    for (auto& child : offspring){
+    for (std::size_t i=0; i<noChosenParents; i+=2){
         indexOfParent_1 = intDistribution(rng);
         indexOfParent_2 = intDistribution(rng);
-        child = CrossoverParents(chosenParents[indexOfParent_1],chosenParents[indexOfParent_2]);
+        offspring[i] = CrossoverParents(chosenParents[indexOfParent_1],chosenParents[indexOfParent_2]);
+        offspring[i+1] = CrossoverParents(chosenParents[indexOfParent_2],chosenParents[indexOfParent_1]);
     }
     for (auto& child : offspring){
         std::cout << "OFFSPRING:" << child << std::endl;
