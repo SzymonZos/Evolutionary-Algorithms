@@ -2,6 +2,7 @@
 #define TRAVELLINGSALESMANPROBLEM_TYPES_HPP
 
 #include <array>
+#include <map>
 
 template<std::size_t size>
 using IntArray = std::array<int32_t, size>;

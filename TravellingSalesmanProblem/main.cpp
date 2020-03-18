@@ -13,7 +13,7 @@ constexpr const std::size_t noAlleles = 10;
 constexpr std::size_t noParents = 250;
 constexpr double n = 0.8;
 constexpr std::size_t noOffspring = n * noParents;
-constexpr double pm = 0.2; // need a better name for this variable
+constexpr double mutationProbability = 0.2;
 constexpr std::size_t tMax = 1000;
 
 template<typename T>
@@ -99,6 +99,38 @@ T CrossoverParents(const T& parent1, const T& parent2) {
     return offspring;
 }
 
+template<typename T>
+T GenerateOffspring(const T& parents) {
+    T offspring = {};
+    std::random_device randomDevice;
+    std::mt19937 rng(randomDevice());
+    std::uniform_int_distribution<> intDistribution(0, noOffspring - 1);
+    IntArray<2> index = {};
+    for (std::size_t i = 0; i < noOffspring; i += 2) {
+        std::generate(index.begin(), index.end(),
+                      [&] { return intDistribution(rng); });
+        offspring[i] = CrossoverParents(parents[index[0]], parents[index[1]]);
+        offspring[i + 1] = CrossoverParents(parents[index[1]], parents[index[0]]);
+    }
+    return offspring;
+}
+
+template<typename T>
+void MutateOffspring(T&& offspring) {
+    std::random_device randomDevice;
+    std::mt19937 rng(randomDevice());
+    std::uniform_real_distribution<> probabilityDistribution(0.0, 1.0);
+    std::uniform_int_distribution<> mutationDistribution(0, noAlleles - 1);
+    IntArray<2> index = {};
+    for (auto& child : offspring){
+        if (probabilityDistribution(rng) < mutationProbability) {
+            std::generate(index.begin(), index.end(),
+                          [&] { return mutationDistribution(rng); });
+            std::swap(child[index[0]], child[index[1]]);
+        }
+    }
+}
+
 int main() {
     constexpr IntArray<noAlleles> x = {0, 3, 6, 7, 15, 12, 14, 9, 7, 0};
     constexpr IntArray<noAlleles> y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
@@ -107,73 +139,36 @@ int main() {
     auto population = CreateInitialPopulation();
     auto parentCostValues = CalculateCostValues(population, distanceMatrix);
     auto chosenParents = SelectParents(population, parentCostValues);
-
-
-////    std::array<int32_t, 5> parent1 = {2, 4, 5, 1, 3};
-////    std::array<int32_t, 5> parent2 = {1, 5, 4, 2, 3};
-////
-////    auto offspring1 = CrossoverParents(parent1, parent2);
-////    auto offspring2 = CrossoverParents(parent2, parent1);
-////
-
-    std::random_device randomDevice;
-    std::mt19937 rng(randomDevice());
-
-    IntMatrix<noAlleles, noOffspring> offspring = {};
-    std::uniform_int_distribution<> intDistribution(0, 199);
-    std::size_t indexOfParent_1 = 0;
-    std::size_t indexOfParent_2 = 0;
-    for (std::size_t i = 0; i < noOffspring; i += 2) {
-        indexOfParent_1 = intDistribution(rng);
-        indexOfParent_2 = intDistribution(rng);
-        offspring[i] = CrossoverParents(chosenParents[indexOfParent_1], chosenParents[indexOfParent_2]);
-        offspring[i + 1] = CrossoverParents(chosenParents[indexOfParent_2], chosenParents[indexOfParent_1]);
+    auto offspring = GenerateOffspring(chosenParents);
+    MutateOffspring(offspring);
+    auto offspringCostValues = CalculateCostValues(offspring, distanceMatrix);
+    for (const auto& cost : offspringCostValues) {
+        std::cout << "Cost value is: " << cost << std::endl;
     }
-    for (auto& child : offspring){
-        std::cout << "OFFSPRING:" << child << std::endl;
+
+    IntMatrix<noAlleles, noParents> newPopulation = population;
+    int noChangedCasesDebug = 0;
+    for (std::size_t i = 0; i < noOffspring; i++){
+        auto maxCostPosition = std::distance(parentCostValues.begin(),
+                                             std::max_element(parentCostValues.begin(),
+                                                     parentCostValues.end()));
+        if (offspringCostValues[i] < parentCostValues[maxCostPosition]) {
+            newPopulation[maxCostPosition] = offspring[i];
+            parentCostValues[maxCostPosition] = offspringCostValues[i];
+            noChangedCasesDebug++;
+        }
     }
-//
-//    double mutationProbability = 0.2;
-//    std::uniform_real_distribution<> probabilityDistribution(0.0, 1.0);
-//    std::uniform_int_distribution<> mutationDistribution(0, 9);
-//    std::size_t mutatingGen_1 = 0;
-//    std::size_t mutatingGen_2 = 0;
-//    std::size_t tmp = 0;
-//    std::size_t mutationCount = 0;
-//    double mutationChance = 0.0;
-//    for (auto& child : offspring){
-//        mutationChance = probabilityDistribution(rng);
-//        if (mutationChance < mutationProbability) {
-//            std::cout << "BEFORE MUTATION: " << child << std::endl;
-//            mutatingGen_1 = mutationDistribution(rng);
-//            mutatingGen_2 = mutationDistribution(rng);
-//            tmp = child[mutatingGen_1];
-//            child[mutatingGen_1] = child[mutatingGen_2];
-//            child[mutatingGen_2] = tmp;
-//            std::cout << "AFTER MUTATION:  " << child << std::endl;
-//            mutationCount++;
-//        }
-//    }
-//    std::cout << "Number of mutated: " << mutationCount << std::endl;
-//
-//    std::array<double, noOffspring> offspringCostValues = CalculateCostValue<std::array<arrayInt, noOffspring>, std::array<double, noOffspring>>(offspring, distanceMatrix);
-//    for (const auto& cost : offspringCostValues) {
-//        std::cout << "Cost value is: " << cost << std::endl;
-//    }
-//
-//    std::array<arrayInt, noParents> newPopulation = population;
-//    int noChangedCasesDebug=0;
-//    for (std::size_t i=0; i<noOffspring; i++){
-//        auto maxCostPosition = std::distance(parentCostValues.begin(),
-//                                             std::max_element(parentCostValues.begin(), parentCostValues.end()));
-//        if(offspringCostValues[i]<parentCostValues[maxCostPosition]){
-//            newPopulation[maxCostPosition]=offspring[i];
-//            parentCostValues[maxCostPosition]=offspringCostValues[i];
-//            noChangedCasesDebug++;
-//        }
-//    }
-//    std::cout << noChangedCasesDebug << std::endl;
-//    population=newPopulation;
+    std::cout << noChangedCasesDebug << std::endl;
+    population = newPopulation;
+    std::multimap<int, std::vector<int>> test;
+    test.insert({1, {5}});
+    test.insert({-1, {6}});
+    test.insert({10, {7}});
+    test.insert({-10, {8}});
+    test.insert({-10, {8}});
+
+    print_map(test);
+
     /*teraz tylko zapetlic i algorytm gotowy kappa*/
     return 0;
 }
