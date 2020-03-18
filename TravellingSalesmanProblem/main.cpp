@@ -14,7 +14,7 @@ constexpr std::size_t noParents = 250;
 constexpr double n = 0.8;
 constexpr std::size_t noOffspring = n * noParents;
 constexpr double mutationProbability = 0.2;
-constexpr std::size_t tMax = 1000;
+constexpr std::size_t tMax = 1;
 
 template<typename T>
 constexpr DblMatrix<noAlleles, noAlleles> CalculateDistanceMatrix(const T& x,
@@ -135,40 +135,28 @@ int main() {
     constexpr IntArray<noAlleles> x = {0, 3, 6, 7, 15, 12, 14, 9, 7, 0};
     constexpr IntArray<noAlleles> y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
     constexpr auto distanceMatrix = CalculateDistanceMatrix(x, y);
-
     auto population = CreateInitialPopulation();
-    auto parentCostValues = CalculateCostValues(population, distanceMatrix);
-    auto chosenParents = SelectParents(population, parentCostValues);
-    auto offspring = GenerateOffspring(chosenParents);
-    MutateOffspring(offspring);
-    auto offspringCostValues = CalculateCostValues(offspring, distanceMatrix);
-    for (const auto& cost : offspringCostValues) {
-        std::cout << "Cost value is: " << cost << std::endl;
-    }
 
-    IntMatrix<noAlleles, noParents> newPopulation = population;
-    int noChangedCasesDebug = 0;
-    for (std::size_t i = 0; i < noOffspring; i++){
-        auto maxCostPosition = std::distance(parentCostValues.begin(),
-                                             std::max_element(parentCostValues.begin(),
-                                                     parentCostValues.end()));
-        if (offspringCostValues[i] < parentCostValues[maxCostPosition]) {
-            newPopulation[maxCostPosition] = offspring[i];
-            parentCostValues[maxCostPosition] = offspringCostValues[i];
-            noChangedCasesDebug++;
+    for (std::size_t i = 0; i < tMax; i++) {
+        auto parentCostValues = CalculateCostValues(population, distanceMatrix);
+        auto chosenParents = SelectParents(population, parentCostValues);
+        //TODO: Fix GenerateOffspring; some corner cases are there
+        auto offspring = GenerateOffspring(chosenParents);
+        std::cout << offspring << std::endl;
+        MutateOffspring(offspring);
+        auto offspringCostValues = CalculateCostValues(offspring, distanceMatrix);
+
+        std::multimap<double, IntArray<noAlleles>> sortedPopulation;
+        for (std::size_t i = 0; i < noParents; i++) {
+            sortedPopulation.insert({parentCostValues[i], population[i]});
+            if (i < noOffspring) {
+                sortedPopulation.insert({offspringCostValues[i], offspring[i]});
+            }
         }
+//        print_map(sortedPopulation);
+        auto it = sortedPopulation.begin();
+        std::generate(population.begin(), population.end(),
+                      [&] { return (it++)->second; });
     }
-    std::cout << noChangedCasesDebug << std::endl;
-    population = newPopulation;
-    std::multimap<int, std::vector<int>> test;
-    test.insert({1, {5}});
-    test.insert({-1, {6}});
-    test.insert({10, {7}});
-    test.insert({-10, {8}});
-    test.insert({-10, {8}});
-
-    print_map(test);
-
-    /*teraz tylko zapetlic i algorytm gotowy kappa*/
     return 0;
 }

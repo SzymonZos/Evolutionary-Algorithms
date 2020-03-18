@@ -23,15 +23,13 @@ std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
 
 template<typename Map>
 void print_map(const Map& m) {
-    std::cout << "{";
     for(const auto& p : m) {
         std::cout << '\'' << p.first << "': [";
         for(const auto& v : p.second) {
             std::cout << v << ", ";
         }
-        std::cout << "\b\b], ";
+        std::cout << "\b\b]\n";
     }
-    std::cout << "\b\b}\n";
 }
 
 

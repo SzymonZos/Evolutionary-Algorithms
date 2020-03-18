@@ -3,6 +3,7 @@
 
 #include <array>
 #include <map>
+#include <unordered_map>
 
 template<std::size_t size>
 using IntArray = std::array<int32_t, size>;
