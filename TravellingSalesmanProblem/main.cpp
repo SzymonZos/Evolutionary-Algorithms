@@ -14,7 +14,7 @@ constexpr std::size_t noParents = 250;
 constexpr double n = 0.8;
 constexpr std::size_t noOffspring = n * noParents;
 constexpr double mutationProbability = 0.2;
-constexpr std::size_t tMax = 1;
+constexpr std::size_t tMax = 1000;
 
 template<typename T>
 constexpr DblMatrix<noAlleles, noAlleles> CalculateDistanceMatrix(const T& x,
@@ -82,16 +82,18 @@ auto SelectParents(const Pop& parents, const Cost& costValues) {
 
 template<typename T>
 T CrossoverParents(const T& parent1, const T& parent2) {
+    using type = typename T::value_type;
+    type dummy = -1;
     T offspring = {};
+    std::fill(offspring.begin(), offspring.end(), dummy);
     std::size_t index = 0;
     typename T::const_iterator iter;
-    using type = typename T::value_type;
     for (std::size_t i = 0; i < parent1.size(); i++) {
         offspring[index] = parent1[index];
         iter = std::find(parent1.cbegin(), parent1.cend(), parent2[index]);
         if (iter == parent1.cbegin()) {
             CopyIfOutput(parent2.cbegin(), parent2.cend(), offspring.begin(),
-                         [=](type value){ return !value; });
+                         [=](type value){ return value == dummy; });
             break;
         }
         index = std::distance(parent1.cbegin(), iter);
@@ -136,13 +138,12 @@ int main() {
     constexpr IntArray<noAlleles> y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
     constexpr auto distanceMatrix = CalculateDistanceMatrix(x, y);
     auto population = CreateInitialPopulation();
+    double minCostValue = 0;
 
     for (std::size_t i = 0; i < tMax; i++) {
         auto parentCostValues = CalculateCostValues(population, distanceMatrix);
         auto chosenParents = SelectParents(population, parentCostValues);
-        //TODO: Fix GenerateOffspring; some corner cases are there
         auto offspring = GenerateOffspring(chosenParents);
-        std::cout << offspring << std::endl;
         MutateOffspring(offspring);
         auto offspringCostValues = CalculateCostValues(offspring, distanceMatrix);
 
@@ -153,10 +154,12 @@ int main() {
                 sortedPopulation.insert({offspringCostValues[i], offspring[i]});
             }
         }
-//        print_map(sortedPopulation);
         auto it = sortedPopulation.begin();
         std::generate(population.begin(), population.end(),
                       [&] { return (it++)->second; });
+        minCostValue = sortedPopulation.begin()->first;
     }
+    std::cout << "Best route is: " << population[0] <<
+    " with cost value: " << minCostValue << std::endl;
     return 0;
 }
