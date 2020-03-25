@@ -16,12 +16,12 @@ constexpr std::size_t noOffspring = n * noParents;
 constexpr double mutationProbability = 0.2;
 constexpr std::size_t tMax = 1000;
 
-template<typename T>
-constexpr DblMatrix<noAlleles, noAlleles> CalculateDistanceMatrix(const T& x,
-                                                                  const T& y) {
-    DblMatrix<noAlleles, noAlleles> distanceMatrix = {};
-    for (std::size_t i = 0; i < noAlleles; i++) {
-        for (std::size_t j = 0; j < noAlleles; j++) {
+template<std::size_t size>
+constexpr auto CalculateDistanceMatrix(const IntArray<size>& x,
+                                       const IntArray<size>& y) {
+    DblMatrix<size, size> distanceMatrix = {};
+    for (std::size_t i = 0; i < size; i++) {
+        for (std::size_t j = 0; j < size; j++) {
             distanceMatrix[i][j] = Distance(x[i], x[j], y[i], y[j]);
         }
     }
@@ -42,9 +42,10 @@ IntMatrix<noAlleles, noParents> CreateInitialPopulation() {
     return population;
 }
 
-template<typename Pop, typename Dist>
-auto CalculateCostValues(const Pop& population, const Dist& distanceMatrix) {
-    DblArray<population.size()> costValues = {};
+template<typename Dist, std::size_t size>
+auto CalculateCostValues(const IntMatrix<noAlleles, size>& population,
+                         const Dist& distanceMatrix) {
+    DblArray<size> costValues = {};
     std::size_t idx = 0;
     for (auto& chromosome : population) {
         costValues[idx] += distanceMatrix[chromosome.front()][chromosome.back()];
