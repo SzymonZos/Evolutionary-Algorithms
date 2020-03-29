@@ -4,30 +4,25 @@
 #include "Algorithm.hpp"
 #include "Types.hpp"
 #include "Operators.hpp"
+#include "GeneticAlgorithm.hpp"
 
 // Cities 1 ((2 + 3 + 0 + 9 + 1 + 9 + 9 + 7) % 5 = 0)
 // x = [0, 3, 6, 7, 15, 12, 14, 9, 7, 0]
 // y = [1, 4, 5, 3, 0, 4, 10, 6, 9, 10]
 
-constexpr const std::size_t noAlleles = 10;
-constexpr std::size_t noParents = 250;
-constexpr double n = 0.8;
-constexpr std::size_t noOffspring = n * noParents;
-constexpr double mutationProbability = 0.2;
-constexpr std::size_t tMax = 1000;
-
-template<std::size_t size>
-constexpr auto CalculateDistanceMatrix(const IntArray<size>& x,
-                                       const IntArray<size>& y) {
-    DblMatrix<size, size> distanceMatrix = {};
-    for (std::size_t i = 0; i < size; i++) {
-        for (std::size_t j = 0; j < size; j++) {
+template<std::size_t noAlleles>
+constexpr auto CalculateDistanceMatrix(const IntArray<noAlleles>& x,
+                                       const IntArray<noAlleles>& y) {
+    DblMatrix<noAlleles, noAlleles> distanceMatrix = {};
+    for (std::size_t i = 0; i < noAlleles; i++) {
+        for (std::size_t j = 0; j < noAlleles; j++) {
             distanceMatrix[i][j] = Distance(x[i], x[j], y[i], y[j]);
         }
     }
     return distanceMatrix;
 }
 
+template<std::size_t noAlleles, std::size_t noParents>
 IntMatrix<noAlleles, noParents> CreateInitialPopulation() {
     std::random_device randomDevice;
     std::mt19937 randomNumberGenerator(randomDevice());
@@ -42,10 +37,10 @@ IntMatrix<noAlleles, noParents> CreateInitialPopulation() {
     return population;
 }
 
-template<typename Dist, std::size_t size>
-auto CalculateCostValues(const IntMatrix<noAlleles, size>& population,
-                         const Dist& distanceMatrix) {
-    DblArray<size> costValues = {};
+template<std::size_t noAlleles, std::size_t populationSize>
+auto CalculateCostValues(const IntMatrix<noAlleles, populationSize>& population,
+                         const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
+    DblArray<populationSize> costValues = {};
     std::size_t idx = 0;
     for (auto& chromosome : population) {
         costValues[idx] += distanceMatrix[chromosome.front()][chromosome.back()];
@@ -57,8 +52,9 @@ auto CalculateCostValues(const IntMatrix<noAlleles, size>& population,
     return costValues;
 }
 
-template<typename Pop, typename Cost>
-auto SelectParents(const Pop& parents, const Cost& costValues) {
+template<std::size_t noOffspring, std::size_t noAlleles, std::size_t noParents>
+auto SelectParents(const IntMatrix<noAlleles, noParents>& parents,
+                   const DblArray<noParents>& costValues) {
     IntMatrix<noAlleles, noOffspring> chosenParents = {};
     auto maxCost = std::max_element(costValues.begin(), costValues.end());
     double ts = std::accumulate(costValues.begin(), costValues.end(), 0.0,
@@ -105,6 +101,7 @@ T CrossoverParents(const T& parent1, const T& parent2) {
 template<typename T>
 T GenerateOffspring(const T& parents) {
     T offspring = {};
+    auto noOffspring = parents.size();
     std::random_device randomDevice;
     std::mt19937 rng(randomDevice());
     std::uniform_int_distribution<> intDistribution(0, noOffspring - 1);
@@ -119,9 +116,10 @@ T GenerateOffspring(const T& parents) {
 }
 
 template<typename T>
-void MutateOffspring(T&& offspring) {
+void MutateOffspring(T&& offspring, double mutationProbability) {
     std::random_device randomDevice;
     std::mt19937 rng(randomDevice());
+    auto noAlleles = offspring.cbegin()->size();
     std::uniform_real_distribution<> probabilityDistribution(0.0, 1.0);
     std::uniform_int_distribution<> mutationDistribution(0, noAlleles - 1);
     IntArray<2> index = {};
@@ -135,17 +133,24 @@ void MutateOffspring(T&& offspring) {
 }
 
 int main() {
+    constexpr double mutationProbability = 0.2;
+    constexpr std::size_t noAlleles = 10;
+    constexpr std::size_t noParents = 250;
+    constexpr double n = 0.8;
+    constexpr std::size_t noOffspring = n * noParents;
+    constexpr std::size_t tMax = 1000;
+
     constexpr IntArray<noAlleles> x = {0, 3, 6, 7, 15, 12, 14, 9, 7, 0};
     constexpr IntArray<noAlleles> y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
     constexpr auto distanceMatrix = CalculateDistanceMatrix(x, y);
-    auto population = CreateInitialPopulation();
+    auto population = CreateInitialPopulation<noAlleles, noParents>();
     double minCostValue = 0;
 
     for (std::size_t i = 0; i < tMax; i++) {
         auto parentCostValues = CalculateCostValues(population, distanceMatrix);
-        auto chosenParents = SelectParents(population, parentCostValues);
+        auto chosenParents = SelectParents<noOffspring>(population, parentCostValues);
         auto offspring = GenerateOffspring(chosenParents);
-        MutateOffspring(offspring);
+        MutateOffspring(offspring, mutationProbability);
         auto offspringCostValues = CalculateCostValues(offspring, distanceMatrix);
 
         std::multimap<double, IntArray<noAlleles>> sortedPopulation;
