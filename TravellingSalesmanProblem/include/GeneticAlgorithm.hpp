@@ -105,8 +105,8 @@ private:
     template<typename T>
     T CrossoverParents(const T& parent1, const T& parent2) {
         using type = typename T::value_type;
-        type dummy = -1;
         T offspring = {};
+        type dummy = -1;
         std::fill(offspring.begin(), offspring.end(), dummy);
         std::size_t index = 0;
         typename T::const_iterator iter;

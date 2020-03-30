@@ -15,5 +15,5 @@ void Timer::StopTimer() {
             (startTimePoint_).time_since_epoch().count();
     const auto end = time_point_cast<milliseconds>
             (endTimePoint).time_since_epoch().count();
-    std::cout << "Elapsed time: " << end - start << " ms  \n";
+    std::cout << "Elapsed time: " << (end - start) / 1000.0 << " s  \n";
 }

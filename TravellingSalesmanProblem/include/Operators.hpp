@@ -7,7 +7,7 @@ std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
     for (const auto& value : array) {
         stream << value << ", ";
     }
-    stream << "\b\b]\n";
+    stream << "\b\b]";
     return stream;
 }
 
