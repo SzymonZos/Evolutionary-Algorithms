@@ -1,6 +1,8 @@
 #ifndef TRAVELLINGSALESMANPROBLEM_OPERATORS_HPP
 #define TRAVELLINGSALESMANPROBLEM_OPERATORS_HPP
 
+#include <iostream>
+
 template<typename T, std::size_t N>
 std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
     stream << "[";

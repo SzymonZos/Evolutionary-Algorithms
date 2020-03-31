@@ -14,7 +14,8 @@ public:
                      std::size_t tMax,
                      DblMatrix<noAlleles, noAlleles> distanceMatrix) :
         mutationProbability_{mutationProbability},
-        tMax_{tMax}, distanceMatrix_{distanceMatrix} {
+        tMax_{tMax},
+        distanceMatrix_{distanceMatrix} {
         Run();
     }
 
