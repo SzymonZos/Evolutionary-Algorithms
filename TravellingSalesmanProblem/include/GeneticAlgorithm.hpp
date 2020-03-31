@@ -55,7 +55,6 @@ private:
     std::multimap<double, IntArray<noAlleles>> sortedPopulation_{};
     double minCostValue_{};
 
-
     void CreateInitialPopulation() {
         IntArray<noAlleles> cities;
         std::iota(cities.begin(), cities.end(), 0);
@@ -148,7 +147,6 @@ private:
         }
     }
 
-
     void SortPopulation() {
         for (std::size_t i = 0; i < noParents; i++) {
             sortedPopulation_.insert({parentCostValues_[i], parents_[i]});
@@ -168,6 +166,5 @@ private:
     }
 
 };
-
 
 #endif //TRAVELLINGSALESMANPROBLEM_GENETICALGORITHM_HPP

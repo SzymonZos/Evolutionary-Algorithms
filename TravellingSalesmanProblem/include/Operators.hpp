@@ -32,5 +32,4 @@ void print_map(const Map& m) {
     }
 }
 
-
 #endif //TRAVELLINGSALESMANPROBLEM_OPERATORS_HPP
