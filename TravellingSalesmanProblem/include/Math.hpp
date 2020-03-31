@@ -29,4 +29,4 @@ constexpr double Distance(T&& x1, T&& x2, T&& y1, T&& y2) {
     return CtSqrt(AxisSquared(x1, x2) + AxisSquared(y1, y2));
 }
 
-#endif //TRAVELLINGSALESMANPROBLEM_MATH_HPP
+#endif // TRAVELLINGSALESMANPROBLEM_MATH_HPP

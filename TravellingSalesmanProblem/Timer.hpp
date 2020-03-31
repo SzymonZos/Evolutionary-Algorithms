@@ -15,9 +15,9 @@ public:
     Timer& operator=(Timer&& other) = delete;
 
 private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> startTimePoint_;
+    std::chrono::time_point<std::chrono::high_resolution_clock>
+        startTimePoint_;
     void StopTimer();
 };
 
-
-#endif //BASICCPPTHREADS_TIMER_HPP
+#endif // BASICCPPTHREADS_TIMER_HPP

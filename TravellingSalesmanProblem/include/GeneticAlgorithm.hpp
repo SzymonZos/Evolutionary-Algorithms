@@ -1,22 +1,20 @@
 #ifndef TRAVELLINGSALESMANPROBLEM_GENETICALGORITHM_HPP
 #define TRAVELLINGSALESMANPROBLEM_GENETICALGORITHM_HPP
 
-#include <random>
-#include "Math.hpp"
 #include "Algorithm.hpp"
-#include "Types.hpp"
+#include "Math.hpp"
 #include "Operators.hpp"
+#include "Types.hpp"
+#include <random>
 
 template<std::size_t noOffspring, std::size_t noAlleles, std::size_t noParents>
 class GeneticAlgorithm {
 public:
-
     GeneticAlgorithm(double mutationProbability,
                      std::size_t tMax,
                      DblMatrix<noAlleles, noAlleles> distanceMatrix) :
-                     mutationProbability_{mutationProbability},
-                     tMax_{tMax},
-                     distanceMatrix_{distanceMatrix} {
+        mutationProbability_{mutationProbability},
+        tMax_{tMax}, distanceMatrix_{distanceMatrix} {
         Run();
     }
 
@@ -32,9 +30,8 @@ public:
             offspringCostValues_ = CalculateCostValues(offspring_);
             ReplacePopulation();
         }
-        std::cout << "Best route is: " << parents_[0] <<
-                  " with cost value: " << minCostValue_ << std::endl;
-
+        std::cout << "Best route is: " << parents_[0]
+                  << " with cost value: " << minCostValue_ << std::endl;
     }
 
 private:
@@ -69,9 +66,11 @@ private:
         DblArray<size> costValues = {};
         std::size_t idx = 0;
         for (auto& chromosome : population) {
-            costValues[idx] += distanceMatrix_[chromosome.front()][chromosome.back()];
+            costValues[idx] += distanceMatrix_[chromosome.front()]
+                                              [chromosome.back()];
             for (std::size_t i = 0; i < chromosome.size() - 1; i++) {
-                costValues[idx] += distanceMatrix_[chromosome[i]][chromosome[i + 1]];
+                costValues[idx] += distanceMatrix_[chromosome[i]]
+                                                  [chromosome[i + 1]];
             }
             idx++;
         }
@@ -82,10 +81,11 @@ private:
         IntMatrix<noAlleles, noOffspring> chosenParents = {};
         auto maxCost = std::max_element(parentCostValues_.begin(),
                                         parentCostValues_.end());
-        double ts = std::accumulate(parentCostValues_.begin(),
-                                    parentCostValues_.end(), 0.0,
-                                    [&](double prev, double curr) {
-                                        return prev + *maxCost - curr; });
+        double ts = std::accumulate(
+            parentCostValues_.begin(),
+            parentCostValues_.end(),
+            0.0,
+            [&](double prev, double curr) { return prev + *maxCost - curr; });
         std::uniform_real_distribution<> realDistribution(0.0, ts);
         for (auto& chosenParent : chosenParents) {
             double randomNumber = realDistribution(rng_);
@@ -114,8 +114,10 @@ private:
             offspring[index] = parent1[index];
             iter = std::find(parent1.cbegin(), parent1.cend(), parent2[index]);
             if (iter == parent1.cbegin()) {
-                CopyIfOutput(parent2.cbegin(), parent2.cend(), offspring.begin(),
-                             [=](type value){ return value == dummy; });
+                CopyIfOutput(parent2.cbegin(),
+                             parent2.cend(),
+                             offspring.begin(),
+                             [=](type value) { return value == dummy; });
                 break;
             }
             index = std::distance(parent1.cbegin(), iter);
@@ -127,8 +129,9 @@ private:
     void GenerateOffspring(T&& parents) {
         IntArray<2> index = {};
         for (std::size_t i = 0; i < noOffspring; i += 2) {
-            std::generate(index.begin(), index.end(),
-                          [&] { return offspringDist_(rng_); });
+            std::generate(index.begin(), index.end(), [&] {
+                return offspringDist_(rng_);
+            });
             offspring_[i] = CrossoverParents(parents[index[0]],
                                              parents[index[1]]);
             offspring_[i + 1] = CrossoverParents(parents[index[1]],
@@ -138,10 +141,11 @@ private:
 
     void MutateOffspring() {
         IntArray<2> index = {};
-        for (auto& child : offspring_){
+        for (auto& child : offspring_) {
             if (probabilityDist_(rng_) < mutationProbability_) {
-                std::generate(index.begin(), index.end(),
-                              [&] { return mutationDist_(rng_); });
+                std::generate(index.begin(), index.end(), [&] {
+                    return mutationDist_(rng_);
+                });
                 std::swap(child[index[0]], child[index[1]]);
             }
         }
@@ -151,7 +155,8 @@ private:
         for (std::size_t i = 0; i < noParents; i++) {
             sortedPopulation_.insert({parentCostValues_[i], parents_[i]});
             if (i < noOffspring) {
-                sortedPopulation_.insert({offspringCostValues_[i], offspring_[i]});
+                sortedPopulation_.insert(
+                    {offspringCostValues_[i], offspring_[i]});
             }
         }
     }
@@ -159,12 +164,12 @@ private:
     void ReplacePopulation() {
         SortPopulation();
         auto it = sortedPopulation_.begin();
-        std::generate(parents_.begin(), parents_.end(),
-                      [&] { return (it++)->second; });
+        std::generate(parents_.begin(), parents_.end(), [&] {
+            return (it++)->second;
+        });
         minCostValue_ = sortedPopulation_.begin()->first;
         sortedPopulation_.clear();
     }
-
 };
 
-#endif //TRAVELLINGSALESMANPROBLEM_GENETICALGORITHM_HPP
+#endif // TRAVELLINGSALESMANPROBLEM_GENETICALGORITHM_HPP

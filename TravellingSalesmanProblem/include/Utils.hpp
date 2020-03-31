@@ -16,4 +16,4 @@ constexpr auto CalculateDistanceMatrix(const IntArray<noAlleles>& x,
     return distanceMatrix;
 }
 
-#endif //TRAVELLINGSALESMANPROBLEM_UTILS_HPP
+#endif // TRAVELLINGSALESMANPROBLEM_UTILS_HPP

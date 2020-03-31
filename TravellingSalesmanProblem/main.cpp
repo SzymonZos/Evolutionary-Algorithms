@@ -1,13 +1,15 @@
-#include <iostream>
-#include "Utils.hpp"
 #include "GeneticAlgorithm.hpp"
 #include "Timer.hpp"
+#include "Utils.hpp"
+#include <iostream>
 
 #define GENETIC_ALGORITHM(noParents, n, mutationProbability) \
     { \
         constexpr std::size_t noOffspring = (n) * (noParents); \
         GeneticAlgorithm<noOffspring, noAlleles, noParents> algorithm{ \
-        (mutationProbability), tMax, distanceMatrix}; \
+            (mutationProbability), \
+            tMax, \
+            distanceMatrix}; \
     }
 
 // Cities 1 ((2 + 3 + 0 + 9 + 1 + 9 + 9 + 7) % 5 = 0)
@@ -15,14 +17,16 @@
 // y = [1, 4, 5, 3, 0, 4, 10, 6, 9, 10]
 
 template<std::size_t noAlleles>
-void FirstTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix ) {
+void FirstTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
     Timer timer;
     constexpr std::size_t noParents = 250;
     constexpr std::size_t noOffspring = 0.8 * noParents;
     const double mutationProbability = 0.1;
     const std::size_t tMax = 1000;
     GeneticAlgorithm<noOffspring, noAlleles, noParents> algorithm{
-            mutationProbability, tMax, distanceMatrix};
+        mutationProbability,
+        tMax,
+        distanceMatrix};
 }
 
 template<std::size_t noAlleles>
@@ -34,7 +38,7 @@ void SecondTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
     const DblArray<size> mutationProbabilityVec = {0.1, 0.3, 0.5};
     const std::size_t tMax = 1000;
 
-    for (std::size_t i = 0; i < 10; i ++) {
+    for (std::size_t i = 0; i < 10; i++) {
         for (auto mutationProbability : mutationProbabilityVec) {
             GENETIC_ALGORITHM(100, 0.5, mutationProbability)
             GENETIC_ALGORITHM(100, 0.7, mutationProbability)

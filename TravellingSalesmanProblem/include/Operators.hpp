@@ -23,13 +23,13 @@ std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
 
 template<typename Map>
 void print_map(const Map& m) {
-    for(const auto& p : m) {
+    for (const auto& p : m) {
         std::cout << '\'' << p.first << "': [";
-        for(const auto& v : p.second) {
+        for (const auto& v : p.second) {
             std::cout << v << ", ";
         }
         std::cout << "\b\b]\n";
     }
 }
 
-#endif //TRAVELLINGSALESMANPROBLEM_OPERATORS_HPP
+#endif // TRAVELLINGSALESMANPROBLEM_OPERATORS_HPP

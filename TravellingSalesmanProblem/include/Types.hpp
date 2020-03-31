@@ -17,4 +17,4 @@ using IntMatrix = std::array<IntArray<inner>, outer>;
 template<std::size_t inner, std::size_t outer>
 using DblMatrix = std::array<DblArray<inner>, outer>;
 
-#endif //TRAVELLINGSALESMANPROBLEM_TYPES_HPP
+#endif // TRAVELLINGSALESMANPROBLEM_TYPES_HPP

@@ -5,8 +5,10 @@
 #include <numeric>
 
 template<typename InputIterator, typename OutputIterator, typename Predicate>
-void CopyIfOutput(InputIterator first, InputIterator last,
-                  OutputIterator result, Predicate predicate) {
+void CopyIfOutput(InputIterator first,
+                  InputIterator last,
+                  OutputIterator result,
+                  Predicate predicate) {
     for (; first != last; ++first, ++result) {
         if (predicate(*result)) {
             *result = *first;
@@ -14,4 +16,4 @@ void CopyIfOutput(InputIterator first, InputIterator last,
     }
 }
 
-#endif //TRAVELLINGSALESMANPROBLEM_ALGORITHM_HPP
+#endif // TRAVELLINGSALESMANPROBLEM_ALGORITHM_HPP
