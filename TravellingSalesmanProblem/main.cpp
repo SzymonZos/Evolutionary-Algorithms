@@ -2,9 +2,10 @@
 #include "Timer.hpp"
 #include "Utils.hpp"
 #include "matplotlibcpp.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include <iostream>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 
 namespace plt = matplotlibcpp;
 
@@ -15,6 +16,12 @@ namespace plt = matplotlibcpp;
             (mutationProbability), \
             tMax, \
             distanceMatrix}; \
+        auto [results, minCostValue] = algorithm.GetResult(); \
+        logger->info("{:.4f}, {}, {}, {}", \
+                     minCostValue, \
+                     noParents, \
+                     n, \
+                     mutationProbability); \
     }
 
 // Cities 1 ((2 + 3 + 0 + 9 + 1 + 9 + 9 + 7) % 5 = 0)
@@ -40,11 +47,14 @@ template<std::size_t noAlleles>
 void SecondTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
     Timer timer;
     constexpr std::size_t size = 3;
-    constexpr IntArray<size> noParents = {100, 300, 500};
-    constexpr DblArray<size> n = {0.5, 0.7, 0.9};
     const DblArray<size> mutationProbabilityVec = {0.1, 0.3, 0.5};
     const std::size_t tMax = 1000;
-
+    auto logger = spdlog::rotating_logger_mt("results logger",
+                                             "logs/results.csv",
+                                             1048576 * 5,
+                                             1,
+                                             true);
+    logger->info("minCostValue, noParents, n, mutationProbability");
     for (std::size_t i = 0; i < 10; i++) {
         for (auto mutationProbability : mutationProbabilityVec) {
             GENETIC_ALGORITHM(100, 0.5, mutationProbability)
@@ -60,50 +70,33 @@ void SecondTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
     }
 }
 
+template<std::size_t noAlleles>
+void PlotFirstTask(const IntArray<noAlleles>& x,
+                   const IntArray<noAlleles>& y,
+                   const IntArray<noAlleles>& result) {
+    std::vector<std::size_t> xD, yD;
+    xD.reserve(noAlleles + 1);
+    yD.reserve(noAlleles + 1);
+    for (std::size_t i = 0; i < noAlleles; i++) {
+        xD.push_back(x[result[i]]);
+        yD.push_back(y[result[i]]);
+        plt::annotate(std::to_string(result[i]), xD[i] + 0.2, yD[i]);
+    }
+    xD.push_back(x[result[0]]);
+    yD.push_back(y[result[0]]);
+    plt::scatter(xD, yD, 100.0, {{"c", "red"}, {"marker", "*"}});
+    plt::plot(xD, yD);
+    plt::show();
+}
+
 int main() {
     constexpr std::size_t noAlleles = 10;
     constexpr IntArray<noAlleles> x = {0, 3, 6, 7, 15, 12, 14, 9, 7, 0};
     constexpr IntArray<noAlleles> y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
     constexpr auto distanceMatrix = CalculateDistanceMatrix(x, y);
-    auto[result, minCostValue] = FirstTask(distanceMatrix);
-
-    std::vector<std::size_t> xD, yD;
-    xD.reserve(noAlleles);
-    yD.reserve(noAlleles);
-
-    for(std::size_t i = 0; i < noAlleles; i++) {
-        xD.push_back(x[result[i]]);
-        yD.push_back(y[result[i]]);
-    }
-    xD.push_back(x[result[0]]);
-    yD.push_back(y[result[0]]);
-    plt::plot(xD, yD);
-    plt::plot(xD, yD, "r*");
-    plt::show();
-    //    SecondTask(distanceMatrix);
-//    auto console = spdlog::stdout_color_mt("console");
-//    spdlog::get("console")->info("Hello spdlog!");
-//    spdlog::info("Welcome to spdlog!");
-//    spdlog::error("Some error message with arg: {}", 1);
-//
-//    spdlog::warn("Easy padding in numbers like {:08d}", 12);
-//    spdlog::critical(
-//        "Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}",
-//        42);
-//    spdlog::info("Support for floats {:03.2f}", 1.23456);
-//    spdlog::info("Positional args are {1} {0}..", "too", "supported");
-//    spdlog::info("{:<30}", "left aligned");
-//
-//    spdlog::set_level(spdlog::level::debug); // Set global log level to debug
-//    spdlog::debug("This message should be displayed..");
-//
-//    // change log pattern
-//    spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
-
-    // Compile time log levels
-    // define SPDLOG_ACTIVE_LEVEL to desired level
-//    SPDLOG_TRACE("Some trace message with param {}", {});
-//    SPDLOG_DEBUG("Some debug message");
+    auto [result, minCostValue] = FirstTask(distanceMatrix);
+    PlotFirstTask(x, y, result);
+    SecondTask(distanceMatrix);
 
     return 0;
 }

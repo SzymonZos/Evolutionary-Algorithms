@@ -33,6 +33,7 @@
 
 # Builds
 cmake*/
+**/bin/
 
 # Projects
 .idea/

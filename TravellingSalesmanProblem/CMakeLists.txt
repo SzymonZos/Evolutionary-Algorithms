@@ -4,11 +4,16 @@ project(TravellingSalesmanProblem)
 set(CMAKE_CXX_STANDARD 17)
 
 set(SPDLOG external/spdlog)
-set(SPDLOG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../${SPDLOG})
+set(SPDLOG_DIR ${PROJECT_SOURCE_DIR}/../${SPDLOG})
 set(MATPLOTLIB external/matplotlib-cpp)
-set(MATPLOTLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../${MATPLOTLIB})
+set(MATPLOTLIB_DIR ${PROJECT_SOURCE_DIR}/../${MATPLOTLIB})
 
 add_executable(TravellingSalesmanProblem main.cpp Timer.cpp)
+
+set_target_properties(TravellingSalesmanProblem
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+)
 
 set(VER 2)
 find_package(Python${VER} COMPONENTS Development NumPy)
