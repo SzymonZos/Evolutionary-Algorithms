@@ -10,15 +10,18 @@ set(MATPLOTLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../${MATPLOTLIB})
 
 add_executable(TravellingSalesmanProblem main.cpp Timer.cpp)
 
-find_package(Python3 COMPONENTS Development NumPy)
-set(PYTHON -lpython${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})
+set(VER 2)
+find_package(Python${VER} COMPONENTS Development NumPy)
+set(PYTHON -lpython${VER}.${Python${VER}_VERSION_MINOR})
 
-target_include_directories(TravellingSalesmanProblem PUBLIC
-    include
+target_include_directories(TravellingSalesmanProblem PRIVATE
+    include)
+
+include_directories(SYSTEM
     ${SPDLOG_DIR}/include
-    ${Python3_INCLUDE_DIRS}
-    ${Python3_NumPy_INCLUDE_DIRS}
     ${MATPLOTLIB_DIR}
+    ${Python${VER}_INCLUDE_DIRS}
+    ${Python${VER}_NumPy_INCLUDE_DIRS}
 )
 
 target_compile_options(TravellingSalesmanProblem PRIVATE
@@ -41,3 +44,4 @@ target_link_options(TravellingSalesmanProblem PRIVATE
 )
 
 add_subdirectory(${SPDLOG_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${SPDLOG})
+target_link_libraries(TravellingSalesmanProblem spdlog::spdlog)

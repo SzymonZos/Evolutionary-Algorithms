@@ -1,6 +1,7 @@
 #ifndef TRAVELLINGSALESMANPROBLEM_OPERATORS_HPP
 #define TRAVELLINGSALESMANPROBLEM_OPERATORS_HPP
 
+#include <array>
 #include <iostream>
 
 template<typename T, std::size_t N>
@@ -13,7 +14,7 @@ std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
     return stream;
 }
 
-template<template<typename...> typename TT, typename... T>
+template<template<typename...> class TT, typename... T>
 std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
     stream << "[";
     for (const auto& value : collection) {
