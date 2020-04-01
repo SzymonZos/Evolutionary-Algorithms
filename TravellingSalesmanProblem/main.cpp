@@ -2,6 +2,8 @@
 #include "Timer.hpp"
 #include "Utils.hpp"
 #include <iostream>
+#include "spdlog/spdlog.h"
+#include "matplotlibcpp.h"
 
 #define GENETIC_ALGORITHM(noParents, n, mutationProbability) \
     { \
@@ -20,7 +22,7 @@ template<std::size_t noAlleles>
 void FirstTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
     Timer timer;
     constexpr std::size_t noParents = 250;
-    constexpr std::size_t noOffspring = 0.8 * noParents;
+    constexpr auto noOffspring = static_cast<std::size_t>(0.8 * noParents);
     const double mutationProbability = 0.1;
     const std::size_t tMax = 1000;
     GeneticAlgorithm<noOffspring, noAlleles, noParents> algorithm{
