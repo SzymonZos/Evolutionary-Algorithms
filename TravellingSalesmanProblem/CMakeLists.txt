@@ -15,7 +15,8 @@ find_package(Python${VER} COMPONENTS Development NumPy)
 set(PYTHON -lpython${VER}.${Python${VER}_VERSION_MINOR})
 
 target_include_directories(TravellingSalesmanProblem PRIVATE
-    include)
+    include
+)
 
 include_directories(SYSTEM
     ${SPDLOG_DIR}/include

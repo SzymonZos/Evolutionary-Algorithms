@@ -22,7 +22,8 @@ namespace plt = matplotlibcpp;
 // y = [1, 4, 5, 3, 0, 4, 10, 6, 9, 10]
 
 template<std::size_t noAlleles>
-void FirstTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
+std::tuple<IntArray<noAlleles>, double>
+FirstTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
     Timer timer;
     constexpr std::size_t noParents = 250;
     constexpr auto noOffspring = static_cast<std::size_t>(0.8 * noParents);
@@ -32,6 +33,7 @@ void FirstTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
         mutationProbability,
         tMax,
         distanceMatrix};
+    return algorithm.GetResult();
 }
 
 template<std::size_t noAlleles>
@@ -63,33 +65,45 @@ int main() {
     constexpr IntArray<noAlleles> x = {0, 3, 6, 7, 15, 12, 14, 9, 7, 0};
     constexpr IntArray<noAlleles> y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
     constexpr auto distanceMatrix = CalculateDistanceMatrix(x, y);
-    FirstTask(distanceMatrix);
-    //    SecondTask(distanceMatrix);
-    plt::plot({1, 3, 2, 4});
+    auto[result, minCostValue] = FirstTask(distanceMatrix);
+
+    std::vector<std::size_t> xD, yD;
+    xD.reserve(noAlleles);
+    yD.reserve(noAlleles);
+
+    for(std::size_t i = 0; i < noAlleles; i++) {
+        xD.push_back(x[result[i]]);
+        yD.push_back(y[result[i]]);
+    }
+    xD.push_back(x[result[0]]);
+    yD.push_back(y[result[0]]);
+    plt::plot(xD, yD);
+    plt::plot(xD, yD, "r*");
     plt::show();
-    auto console = spdlog::stdout_color_mt("console");
-    spdlog::get("console")->info("Hello spdlog!");
-    spdlog::info("Welcome to spdlog!");
-    spdlog::error("Some error message with arg: {}", 1);
-
-    spdlog::warn("Easy padding in numbers like {:08d}", 12);
-    spdlog::critical(
-        "Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}",
-        42);
-    spdlog::info("Support for floats {:03.2f}", 1.23456);
-    spdlog::info("Positional args are {1} {0}..", "too", "supported");
-    spdlog::info("{:<30}", "left aligned");
-
-    spdlog::set_level(spdlog::level::debug); // Set global log level to debug
-    spdlog::debug("This message should be displayed..");
-
-    // change log pattern
-    spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
+    //    SecondTask(distanceMatrix);
+//    auto console = spdlog::stdout_color_mt("console");
+//    spdlog::get("console")->info("Hello spdlog!");
+//    spdlog::info("Welcome to spdlog!");
+//    spdlog::error("Some error message with arg: {}", 1);
+//
+//    spdlog::warn("Easy padding in numbers like {:08d}", 12);
+//    spdlog::critical(
+//        "Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}",
+//        42);
+//    spdlog::info("Support for floats {:03.2f}", 1.23456);
+//    spdlog::info("Positional args are {1} {0}..", "too", "supported");
+//    spdlog::info("{:<30}", "left aligned");
+//
+//    spdlog::set_level(spdlog::level::debug); // Set global log level to debug
+//    spdlog::debug("This message should be displayed..");
+//
+//    // change log pattern
+//    spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
 
     // Compile time log levels
     // define SPDLOG_ACTIVE_LEVEL to desired level
-    SPDLOG_TRACE("Some trace message with param {}", {});
-    SPDLOG_DEBUG("Some debug message");
+//    SPDLOG_TRACE("Some trace message with param {}", {});
+//    SPDLOG_DEBUG("Some debug message");
 
     return 0;
 }

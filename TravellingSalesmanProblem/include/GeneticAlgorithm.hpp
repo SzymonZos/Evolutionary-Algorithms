@@ -6,6 +6,7 @@
 #include "Operators.hpp"
 #include "Types.hpp"
 #include <random>
+#include <tuple>
 
 template<std::size_t noOffspring, std::size_t noAlleles, std::size_t noParents>
 class GeneticAlgorithm {
@@ -33,6 +34,10 @@ public:
         }
         std::cout << "Best route is: " << parents_[0]
                   << " with cost value: " << minCostValue_ << std::endl;
+    }
+
+    std::tuple<IntArray<noAlleles>, double> GetResult() {
+        return {parents_[0], minCostValue_};
     }
 
 private:
