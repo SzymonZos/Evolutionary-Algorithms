@@ -1,6 +1,6 @@
-[submodule "spdlog"]
+[submodule "external/spdlog"]
 	path = external/spdlog
 	url = https://github.com/gabime/spdlog
-[submodule "matplotlib-cpp"]
+[submodule "external/matplotlib-cpp"]
 	path = external/matplotlib-cpp
 	url = https://github.com/lava/matplotlib-cpp
