@@ -4,7 +4,6 @@
 #include "matplotlibcpp.h"
 #include "spdlog/spdlog.h"
 #include <iostream>
-#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
 namespace plt = matplotlibcpp;
@@ -74,18 +73,18 @@ template<std::size_t noAlleles>
 void PlotFirstTask(const IntArray<noAlleles>& x,
                    const IntArray<noAlleles>& y,
                    const IntArray<noAlleles>& result) {
-    std::vector<std::size_t> xD, yD;
-    xD.reserve(noAlleles + 1);
-    yD.reserve(noAlleles + 1);
+    std::vector<std::size_t> xPlot, yPlot;
+    xPlot.reserve(noAlleles + 1);
+    yPlot.reserve(noAlleles + 1);
     for (std::size_t i = 0; i < noAlleles; i++) {
-        xD.push_back(x[result[i]]);
-        yD.push_back(y[result[i]]);
-        plt::annotate(std::to_string(result[i]), xD[i] + 0.2, yD[i]);
+        xPlot.push_back(x[result[i]]);
+        yPlot.push_back(y[result[i]]);
+        plt::annotate(std::to_string(result[i]), xPlot[i] + 0.2, yPlot[i]);
     }
-    xD.push_back(x[result[0]]);
-    yD.push_back(y[result[0]]);
-    plt::scatter(xD, yD, 100.0, {{"c", "red"}, {"marker", "*"}});
-    plt::plot(xD, yD);
+    xPlot.push_back(x[result[0]]);
+    yPlot.push_back(y[result[0]]);
+    plt::scatter(xPlot, yPlot, 100.0, {{"c", "red"}, {"marker", "*"}});
+    plt::plot(xPlot, yPlot);
     plt::show();
 }
 
