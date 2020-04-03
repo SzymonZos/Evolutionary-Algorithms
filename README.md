@@ -39,7 +39,7 @@
 
 1. Install Python 2.7 using your package manager. Unfortunately Python 3 does not cooperate well.
 
-```
+```shell script
 pip2 install numpy matplotlib
 git clone https://github.com/SzymonZos/Evolutionary-Algorithms.git
 cd Evolutionary-Algorithms/
