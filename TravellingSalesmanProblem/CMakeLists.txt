@@ -3,6 +3,12 @@ project(TravellingSalesmanProblem)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
+    if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+        add_compile_definitions(MS_WIN64)
+    endif()
+endif()
+
 set(SPDLOG external/spdlog)
 set(SPDLOG_DIR ${PROJECT_SOURCE_DIR}/../${SPDLOG})
 set(MATPLOTLIB external/matplotlib-cpp)
@@ -44,10 +50,10 @@ target_compile_options(TravellingSalesmanProblem PRIVATE
 #    -Wsign-conversion # Warn on sign conversions
     -Wdouble-promotion # Warn if float is implicit promoted to double
     -fconstexpr-depth=1024
-    -Wl,--stack,4194304
 )
 
 target_link_libraries(TravellingSalesmanProblem
     Python${VER}::Python
+    Python${VER}::NumPy
     spdlog::spdlog
 )

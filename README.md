@@ -8,7 +8,7 @@
 
 #### Windows specific black magic
 
-1. [Download](https://www.python.org/downloads/release/python-2717/) desired Python2.7 version.
+1. [Download](https://www.python.org/downloads/release/python-2717/) desired Python2.7 version and install these modules.
    ```shell script
    pip2 install numpy matplotlib
    ```
@@ -19,14 +19,14 @@
    * One **cannot** have included *sh.exe* in the path. Usually it comes with git modules to support git bash.
    * It has to be run from *cmd* or *PowerShell*.
 
-4. Using **MSYS2** shell execute following commands in desired directory
+4. Using **MSYS2** shell execute following commands in the desired directory
    ```shell script
    git clone https://github.com/SzymonZos/Evolutionary-Algorithms.git
    cd Evolutionary-Algorithms
    git submodule update --init --recursive
    ```
 
-5. Then run following commands using **cmd** from Evolutionary-Algorithms/ directory
+5. Then run following commands using **cmd** from Evolutionary-Algorithms\ directory
    ```shell script
    mkdir TravellingSalesmanProblem\build
    cd TravellingSalesmanProblem\build
@@ -39,14 +39,15 @@
 
 1. Install Python 2.7 using your package manager. Unfortunately Python 3 does not cooperate well.
 
-```shell script
-pip2 install numpy matplotlib
-git clone https://github.com/SzymonZos/Evolutionary-Algorithms.git
-cd Evolutionary-Algorithms/
-git submodule update --init --recursive
-mkdir TravellingSalesmanProblem/build/
-cd TravellingSalesmanProblem/build/
-cmake ..
-make
-../bin/TravellingSalesmanProblem
-```
+2. Then run following commands
+   ```shell script
+   pip2 install numpy matplotlib
+   git clone https://github.com/SzymonZos/Evolutionary-Algorithms.git
+   cd Evolutionary-Algorithms/
+   git submodule update --init --recursive
+   mkdir TravellingSalesmanProblem/build/
+   cd TravellingSalesmanProblem/build/
+   cmake ..
+   make
+   ../bin/TravellingSalesmanProblem
+   ```
