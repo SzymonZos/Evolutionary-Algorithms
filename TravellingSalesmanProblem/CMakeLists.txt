@@ -5,7 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-        add_compile_definitions(MS_WIN64)
+        if(NOT MSVC)
+            add_compile_definitions(MS_WIN64)
+        endif()
     endif()
 endif()
 
