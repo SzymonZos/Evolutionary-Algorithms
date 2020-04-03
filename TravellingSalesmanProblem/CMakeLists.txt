@@ -17,7 +17,6 @@ set_target_properties(TravellingSalesmanProblem
 
 set(VER 2)
 find_package(Python${VER} COMPONENTS Development NumPy)
-set(PYTHON -lpython${VER}.${Python${VER}_VERSION_MINOR})
 
 target_include_directories(TravellingSalesmanProblem PRIVATE
     include
@@ -29,6 +28,8 @@ include_directories(SYSTEM
     ${Python${VER}_INCLUDE_DIRS}
     ${Python${VER}_NumPy_INCLUDE_DIRS}
 )
+
+add_subdirectory(${SPDLOG_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${SPDLOG})
 
 target_compile_options(TravellingSalesmanProblem PRIVATE
     -Wall
@@ -43,11 +44,10 @@ target_compile_options(TravellingSalesmanProblem PRIVATE
 #    -Wsign-conversion # Warn on sign conversions
     -Wdouble-promotion # Warn if float is implicit promoted to double
     -fconstexpr-depth=1024
+    -Wl,--stack,4194304
 )
 
-target_link_options(TravellingSalesmanProblem PRIVATE
-    ${PYTHON}
+target_link_libraries(TravellingSalesmanProblem
+    Python${VER}::Python
+    spdlog::spdlog
 )
-
-add_subdirectory(${SPDLOG_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${SPDLOG})
-target_link_libraries(TravellingSalesmanProblem spdlog::spdlog)
