@@ -15,8 +15,10 @@ set(SPDLOG external/spdlog)
 set(SPDLOG_DIR ${PROJECT_SOURCE_DIR}/../${SPDLOG})
 set(MATPLOTLIB external/matplotlib-cpp)
 set(MATPLOTLIB_DIR ${PROJECT_SOURCE_DIR}/../${MATPLOTLIB})
+set(TIMER external/Timer)
+set(TIMER_DIR ${PROJECT_SOURCE_DIR}/../${TIMER})
 
-add_executable(TravellingSalesmanProblem main.cpp Timer.cpp)
+add_executable(TravellingSalesmanProblem main.cpp)
 
 set_target_properties(TravellingSalesmanProblem
     PROPERTIES
@@ -33,6 +35,7 @@ target_include_directories(TravellingSalesmanProblem PRIVATE
 include_directories(SYSTEM
     ${SPDLOG_DIR}/include
     ${MATPLOTLIB_DIR}
+    ${TIMER_DIR}
     ${Python${VER}_INCLUDE_DIRS}
     ${Python${VER}_NumPy_INCLUDE_DIRS}
 )
@@ -40,6 +43,7 @@ include_directories(SYSTEM
 add_subdirectory(${SPDLOG_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${SPDLOG})
 
 target_compile_options(TravellingSalesmanProblem PRIVATE
+    -Werror
     -Wall
     -Wextra
     -Wshadow # Warn if variable overshadows parent context

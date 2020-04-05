@@ -44,7 +44,7 @@ void SecondTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
     Timer timer;
     constexpr std::size_t size = 3;
     const DblArray<size> mutationProbabilityVec = {0.1, 0.3, 0.5};
-    const std::size_t tMax = 10;
+    const std::size_t tMax = 1000;
     auto logger = spdlog::rotating_logger_mt("results logger",
                                              "logs/results.csv",
                                              1048576 * 5,
