@@ -5,8 +5,8 @@
 #include "Types.hpp"
 
 template<std::size_t noAlleles>
-constexpr auto CalculateDistanceMatrix(const IntArray<noAlleles>& x,
-                                       const IntArray<noAlleles>& y) {
+constexpr auto CalculateDistanceMatrix(const DblArray<noAlleles>& x,
+                                       const DblArray<noAlleles>& y) {
     DblMatrix<noAlleles, noAlleles> distanceMatrix = {};
     for (std::size_t i = 0; i < noAlleles; i++) {
         for (std::size_t j = 0; j < noAlleles; j++) {

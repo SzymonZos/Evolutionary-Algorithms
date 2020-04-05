@@ -48,9 +48,10 @@ target_compile_options(TravellingSalesmanProblem PRIVATE
     -Wunused # Warn on anything being unused
     -Woverloaded-virtual # Warn if overload a virtual function
     -Wpedantic # Warn if non-standard C++ is used
-#    -Wconversion # Warn on type conversions that may lose data
-#    -Wsign-conversion # Warn on sign conversions
+    -Wconversion # Warn on type conversions that may lose data
+    -Wsign-conversion # Warn on sign conversions
     -Wdouble-promotion # Warn if float is implicit promoted to double
+    -Wold-style-cast # Warn if c style cast is performed
     -fconstexpr-depth=1024
 )
 

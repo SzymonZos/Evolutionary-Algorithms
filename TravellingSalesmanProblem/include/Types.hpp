@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 template<std::size_t size>
-using IntArray = std::array<int32_t, size>;
+using IntArray = std::array<std::size_t, size>;
 
 template<std::size_t size>
 using DblArray = std::array<double, size>;

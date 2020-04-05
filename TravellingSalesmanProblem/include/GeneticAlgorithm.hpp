@@ -111,7 +111,7 @@ private:
     T CrossoverParents(const T& parent1, const T& parent2) {
         using type = typename T::value_type;
         T offspring = {};
-        type dummy = -1;
+        type dummy = noAlleles;
         std::fill(offspring.begin(), offspring.end(), dummy);
         std::size_t index = 0;
         typename T::const_iterator iter;
@@ -126,7 +126,8 @@ private:
                              [=](type value) { return value == dummy; });
                 break;
             }
-            index = std::distance(parent1.cbegin(), iter);
+            index = static_cast<std::size_t>(
+                std::distance(parent1.cbegin(), iter));
         }
         return offspring;
     }

@@ -34,8 +34,13 @@
 # Builds
 cmake*/
 *build*/
-**/bin/
+bin/
+venv/
 
 # Projects
 .idea/
 .vscode/
+
+# Inputs, outputs
+*.txt
+*.csv*
