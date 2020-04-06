@@ -1,4 +1,5 @@
 import math
+import re
 
 dictionary = {"100, 0.5, 0.1\n": 0, "100, 0.5, 0.3\n": 1, "100, 0.5, 0.5\n": 2,
               "100, 0.7, 0.1\n": 3, "100, 0.7, 0.3\n": 4, "100, 0.7, 0.5\n": 5,
@@ -14,28 +15,26 @@ dictionary = {"100, 0.5, 0.1\n": 0, "100, 0.5, 0.3\n": 1, "100, 0.5, 0.5\n": 2,
               }
 
 with open("bin/logs/results.csv", "r") as file:
-    all_lines_logs = file.readlines()
+    logs = file.readlines()
 
-full_file_wo_logs = []
-for line in all_lines_logs:
-    single_line = line[(line.find("[info]") + 7):]
-    full_file_wo_logs.append(single_line)
+for i, log in enumerate(logs):
+    logs[i] = re.sub(r'\[.+info\]', '', log)
 
 sorted_data = []
 for i in range(len(dictionary)):
     sorted_data.append([])
 
-for line in full_file_wo_logs[1:]:
+for line in logs[1:]:
     iterator_to_key = line.find(", ") + 2
     value = dictionary[line[iterator_to_key:]]
     sorted_data[value].append(line)
 
 with open("processed_data.csv", "w") as write_file:
-    full_file_wo_logs[0] = full_file_wo_logs[0].rstrip() + ", Average, " \
+    logs[0] = logs[0].rstrip() + ", Average, " \
                                                            "Variance, " \
                                                            "standard " \
                                                            "deviation\n "
-    write_file.write(full_file_wo_logs[0])
+    write_file.write(logs[0])
 
     for one_type in sorted_data:
         average = 0
