@@ -7,6 +7,7 @@
 #include "Types.hpp"
 #include <random>
 #include <tuple>
+#include <map>
 
 template<std::size_t noOffspring, std::size_t noAlleles, std::size_t noParents>
 class GeneticAlgorithm {

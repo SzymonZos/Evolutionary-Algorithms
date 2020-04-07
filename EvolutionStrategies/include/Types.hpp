@@ -1,5 +1,5 @@
-#ifndef TRAVELLINGSALESMANPROBLEM_TYPES_HPP
-#define TRAVELLINGSALESMANPROBLEM_TYPES_HPP
+#ifndef EVOLUTIONSTRATEGIES_TYPES_HPP
+#define EVOLUTIONSTRATEGIES_TYPES_HPP
 
 #include <array>
 
@@ -15,4 +15,4 @@ using IntMatrix = std::array<IntArray<inner>, outer>;
 template<std::size_t inner, std::size_t outer>
 using DblMatrix = std::array<DblArray<inner>, outer>;
 
-#endif // TRAVELLINGSALESMANPROBLEM_TYPES_HPP
+#endif // EVOLUTIONSTRATEGIES_TYPES_HPP

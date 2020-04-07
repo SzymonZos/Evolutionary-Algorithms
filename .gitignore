@@ -43,4 +43,6 @@ venv/
 
 # Inputs, outputs
 *.txt
+!CMake*.txt
+!model*.txt
 *.csv*
