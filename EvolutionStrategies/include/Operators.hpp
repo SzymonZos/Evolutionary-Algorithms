@@ -1,9 +1,9 @@
 #ifndef EVOLUTIONSTRATEGIES_OPERATORS_HPP
 #define EVOLUTIONSTRATEGIES_OPERATORS_HPP
 
-#include <type_traits>
 #include <array>
 #include <iostream>
+#include <type_traits>
 
 template<typename T, std::size_t N>
 std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
@@ -15,11 +15,11 @@ std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
             }
             stream << "\b\b]\n";
         } else {
-            stream << "{";
+            stream << "{\n";
             for (const auto& value : array) {
-                stream << value << "\n";
+                stream << value << "\n\n";
             }
-            stream << "\b \b}\n";
+            stream << "}\n";
         }
     }
     return stream;

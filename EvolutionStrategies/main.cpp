@@ -6,14 +6,22 @@
 #include <iostream>
 #include <random>
 #include <vector>
-#include <tuple>
+
+static const double pi = std::acos(-1.0);
+
+struct v;
+
+template<std::size_t size>
+using P = std::array<v, size>;
 
 std::vector<DblArray<2>> GetModelFromFile(std::size_t id) {
     std::vector<DblArray<2>> model;
     try {
-        std::ifstream file{fmt::format("{}/models/model{}.txt", PROJECT_SOURCE_DIR, id)};
+        std::ifstream file{
+            fmt::format("{}/models/model{}.txt", PROJECT_SOURCE_DIR, id)};
         file.exceptions(std::ifstream::badbit | std::ifstream::failbit);
-        for (std::string line; file.peek() != EOF && std::getline(file, line); ) {
+        for (std::string line;
+             file.peek() != EOF && std::getline(file, line);) {
             std::stringstream lineStream{line};
             model.emplace_back();
             for (auto& value : model.back()) {
@@ -21,7 +29,9 @@ std::vector<DblArray<2>> GetModelFromFile(std::size_t id) {
             }
         }
     } catch (const std::ifstream::failure& exception) {
-        fmt::print("Exception: \"{}\" during opening/reading model{}.txt\n", exception.what(), id);
+        fmt::print("Exception: \"{}\" during opening/reading model{}.txt\n",
+                   exception.what(),
+                   id);
     }
     return model;
 }
@@ -39,6 +49,10 @@ struct v {
         return *this;
     }
 
+    double operator()(double input) const {
+        return x[0] * (input * input - x[1] * std::cos(x[2] * pi * input));
+    }
+
     friend std::ostream& operator<<(std::ostream& stream, const v& data) {
         stream << "x: {";
         for (auto value : data.x) {
@@ -54,26 +68,11 @@ struct v {
 };
 
 template<std::size_t size>
-using P = std::array<v, size>;
-
-//template<std::size_t size>
-//DblArray<3> CalculateMean(const P<size>& population) {
-//    DblArray<3> mean;
-//    for (std::size_t i = 0; i < size; i++) {
-//        for (std::size_t j = 0; j < 3; j++) {
-//            mean[j] += population[i].x[j];
-//        }
-//    }
-//    for (std::size_t j = 0; j < 3; j++) {
-//        mean[j] /= size;
-//    }
-//    return mean;
-//}
-//
-//template<std::size_t size>
-//void CalculateStandardDeviation(P<size>& population) {
-//    auto mean = CalculateMean(population);
-//}
+double MeanSquaredError(const std::vector<DblArray<2>>& model,
+                        const P<size>& population) {
+    double ts = std::accumulate(model.begin(), model.end(), 0.0);
+    return ts;
+}
 
 int main() {
     auto model = GetModelFromFile(9);
@@ -88,14 +87,15 @@ int main() {
     std::uniform_real_distribution<> sigmaDistribution{0.0, 10.0};
 
     std::generate(parents.begin(), parents.end(), [&] {
-      DblMatrix<2, 3> random;
-      for (auto& params : random) {
-        params[0] = xDistribution(rng);
-        params[1] = sigmaDistribution(rng);
-      }
-      return random;
+        DblMatrix<2, 3> random;
+        for (auto& params : random) {
+            params[0] = xDistribution(rng);
+            params[1] = sigmaDistribution(rng);
+        }
+        return random;
     });
 
-    std::cout << parents << std::endl;
+    //    std::cout << parents << std::endl;
+    MeanSquaredError(model, parents);
     return 0;
 }
