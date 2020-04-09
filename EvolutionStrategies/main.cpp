@@ -44,39 +44,41 @@ namespace StdDev {
 enum class StandardDeviation : std::size_t { a, b, c };
 }
 
-struct Chromosome {
-    DblArray<3> coefficients{};
-    DblArray<3> standardDeviations{};
-    std::size_t age{};
-
+class Chromosome {
+public:
     Chromosome& operator=(DblMatrix<2, 3>&& random) {
         for (std::size_t i = 0; i < 3; i++) {
-            coefficients[i] = random[i][0];
-            standardDeviations[i] = random[i][1];
+            coefficients_[i] = random[i][0];
+            standardDeviations_[i] = random[i][1];
         }
         return *this;
     }
 
     double operator()(double input) const {
-        return coefficients[Coeff::a] *
+        return coefficients_[Coeff::a] *
                (input * input -
-                coefficients[Coeff::b] *
-                    std::cos(coefficients[Coeff::c] * pi * input));
+                coefficients_[Coeff::b] *
+                    std::cos(coefficients_[Coeff::c] * pi * input));
     }
 
     friend std::ostream& operator<<(std::ostream& stream,
                                     const Chromosome& data) {
         stream << "x: {";
-        for (auto value : data.coefficients) {
+        for (auto value : data.coefficients_) {
             stream << value << ", ";
         }
         stream << "\b\b}\nsigma: {";
-        for (auto value : data.standardDeviations) {
+        for (auto value : data.standardDeviations_) {
             stream << value << ", ";
         }
-        stream << "\b\b}\nage: " << data.age;
+        stream << "\b\b}\nage: " << data.age_;
         return stream;
     }
+
+private:
+    DblArray<3> coefficients_{};
+    DblArray<3> standardDeviations_{};
+    std::size_t age_{};
 };
 
 double MeanSquaredError(const std::array<std::vector<double>, 2>& model,

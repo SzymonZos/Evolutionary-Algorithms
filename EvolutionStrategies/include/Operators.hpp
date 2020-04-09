@@ -8,11 +8,19 @@
 template<template<typename...> class TT, typename... T>
 std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
     if (!collection.empty()) {
-        stream << "[";
-        for (const auto& value : collection) {
-            stream << value << ", ";
+        if (std::is_scalar_v<decltype(collection.front())>) {
+            stream << "[";
+            for (auto value : collection) {
+                stream << value << ", ";
+            }
+            stream << "\b\b]\n";
+        } else {
+            stream << "{\n";
+            for (const auto& value : collection) {
+                stream << value << "\n\n";
+            }
+            stream << "}\n";
         }
-        stream << "\b\b]";
     }
     return stream;
 }
