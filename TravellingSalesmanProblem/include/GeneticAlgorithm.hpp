@@ -59,15 +59,6 @@ private:
     std::multimap<double, IntArray<noAlleles>> sortedPopulation_{};
     double minCostValue_{};
 
-    void CreateInitialPopulation() {
-        IntArray<noAlleles> cities;
-        std::iota(cities.begin(), cities.end(), 0);
-        for (auto& parent : parents_) {
-            parent = cities;
-            std::shuffle(parent.begin(), parent.end(), rng_);
-        }
-    }
-
     template<std::size_t size>
     auto CalculateCostValues(const IntMatrix<noAlleles, size>& population) {
         DblArray<size> costValues = {};
@@ -82,6 +73,15 @@ private:
             idx++;
         }
         return costValues;
+    }
+
+    void CreateInitialPopulation() {
+        IntArray<noAlleles> cities;
+        std::iota(cities.begin(), cities.end(), 0);
+        for (auto& parent : parents_) {
+            parent = cities;
+            std::shuffle(parent.begin(), parent.end(), rng_);
+        }
     }
 
     auto SelectParents() {

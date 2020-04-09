@@ -14,8 +14,8 @@ struct v;
 template<std::size_t size>
 using P = std::array<v, size>;
 
-std::vector<DblArray<2>> GetModelFromFile(std::size_t id) {
-    std::vector<DblArray<2>> model;
+auto GetModelFromFile(std::size_t id) {
+    std::array<std::vector<double>, 2> model;
     try {
         std::ifstream file{
             fmt::format("{}/models/model{}.txt", PROJECT_SOURCE_DIR, id)};
@@ -23,9 +23,10 @@ std::vector<DblArray<2>> GetModelFromFile(std::size_t id) {
         for (std::string line;
              file.peek() != EOF && std::getline(file, line);) {
             std::stringstream lineStream{line};
-            model.emplace_back();
-            for (auto& value : model.back()) {
+            double value = 0.0;
+            for (auto& vector : model) {
                 lineStream >> value;
+                vector.push_back(value);
             }
         }
     } catch (const std::ifstream::failure& exception) {
@@ -76,6 +77,7 @@ double MeanSquaredError(const std::vector<DblArray<2>>& model,
 
 int main() {
     auto model = GetModelFromFile(9);
+    std::cout << model << std::endl;
     constexpr std::size_t mi = 100; // noParents
     constexpr std::size_t lambda = 6 * mi; // noOffspring 5 - 7
     P<mi> parents;
@@ -96,6 +98,6 @@ int main() {
     });
 
     //    std::cout << parents << std::endl;
-    MeanSquaredError(model, parents);
+//    MeanSquaredError(model, parents);
     return 0;
 }
