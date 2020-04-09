@@ -5,6 +5,18 @@
 #include <iostream>
 #include <type_traits>
 
+template<template<typename...> class TT, typename... T>
+std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
+    if (!collection.empty()) {
+        stream << "[";
+        for (const auto& value : collection) {
+            stream << value << ", ";
+        }
+        stream << "\b\b]";
+    }
+    return stream;
+}
+
 template<typename T, std::size_t N>
 std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
     if (!array.empty()) {
@@ -21,18 +33,6 @@ std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
             }
             stream << "}\n";
         }
-    }
-    return stream;
-}
-
-template<template<typename...> class TT, typename... T>
-std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
-    if (!collection.empty()) {
-        stream << "[";
-        for (const auto& value : collection) {
-            stream << value << ", ";
-        }
-        stream << "\b\b]";
     }
     return stream;
 }

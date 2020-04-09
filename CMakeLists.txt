@@ -23,7 +23,7 @@ add_compile_options(
     -Wall
     -Wextra
     -Wshadow # Warn if variable overshadows parent context
-    -Wnon-virtual-dtor # Warn if class with virtual func has novirt dtor
+    -Wnon-virtual-dtor # Warn if class with virtual func has no virtual dtor
     -Wcast-align # Warn for potential performance problem casts
     -Wunused # Warn on anything being unused
     -Woverloaded-virtual # Warn if overload a virtual function

@@ -72,6 +72,7 @@ template<std::size_t size>
 double MeanSquaredError(const std::vector<DblArray<2>>& model,
                         const P<size>& population) {
     double ts = std::accumulate(model.begin(), model.end(), 0.0);
+    std::cout << population << std::endl;
     return ts;
 }
 
@@ -80,6 +81,7 @@ int main() {
     std::cout << model << std::endl;
     constexpr std::size_t mi = 100; // noParents
     constexpr std::size_t lambda = 6 * mi; // noOffspring 5 - 7
+    std::cout << lambda << std::endl;
     P<mi> parents;
 
     // Initialize with uniform distribution
