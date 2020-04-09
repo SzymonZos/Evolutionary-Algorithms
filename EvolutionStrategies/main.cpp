@@ -9,11 +9,6 @@
 
 static const double pi = std::acos(-1.0);
 
-struct v;
-
-template<std::size_t size>
-using P = std::array<v, size>;
-
 auto GetModelFromFile(std::size_t id) {
     std::array<std::vector<double>, 2> model;
     try {
@@ -37,30 +32,46 @@ auto GetModelFromFile(std::size_t id) {
     return model;
 }
 
-struct v {
-    DblArray<3> x{};
-    DblArray<3> sigma{};
+namespace Model {
+enum InputOutput : std::size_t { input, output };
+}
+
+namespace Coeff {
+enum Coefficient : std::size_t { a, b, c };
+}
+
+namespace StdDev {
+enum class StandardDeviation : std::size_t { a, b, c };
+}
+
+struct Chromosome {
+    DblArray<3> coefficients{};
+    DblArray<3> standardDeviations{};
     std::size_t age{};
 
-    v& operator=(DblMatrix<2, 3>&& random) {
+    Chromosome& operator=(DblMatrix<2, 3>&& random) {
         for (std::size_t i = 0; i < 3; i++) {
-            x[i] = random[i][0];
-            sigma[i] = random[i][1];
+            coefficients[i] = random[i][0];
+            standardDeviations[i] = random[i][1];
         }
         return *this;
     }
 
     double operator()(double input) const {
-        return x[0] * (input * input - x[1] * std::cos(x[2] * pi * input));
+        return coefficients[Coeff::a] *
+               (input * input -
+                coefficients[Coeff::b] *
+                    std::cos(coefficients[Coeff::c] * pi * input));
     }
 
-    friend std::ostream& operator<<(std::ostream& stream, const v& data) {
+    friend std::ostream& operator<<(std::ostream& stream,
+                                    const Chromosome& data) {
         stream << "x: {";
-        for (auto value : data.x) {
+        for (auto value : data.coefficients) {
             stream << value << ", ";
         }
         stream << "\b\b}\nsigma: {";
-        for (auto value : data.sigma) {
+        for (auto value : data.standardDeviations) {
             stream << value << ", ";
         }
         stream << "\b\b}\nage: " << data.age;
@@ -68,21 +79,23 @@ struct v {
     }
 };
 
-template<std::size_t size>
-double MeanSquaredError(const std::vector<DblArray<2>>& model,
-                        const P<size>& population) {
-    double ts = std::accumulate(model.begin(), model.end(), 0.0);
-    std::cout << population << std::endl;
-    return ts;
+double MeanSquaredError(const std::array<std::vector<double>, 2>& model,
+                        const std::vector<Chromosome>& population) {
+    double meanSquaredError = 0.0;
+    for (std::size_t i = 0; i < population.size(); i++) {
+        double error = population[i](model[Model::input][i]) -
+                       model[Model::output][i];
+        meanSquaredError += error * error;
+    }
+    return meanSquaredError / population.size();
 }
 
 int main() {
-    auto model = GetModelFromFile(9);
-    std::cout << model << std::endl;
-    constexpr std::size_t mi = 100; // noParents
-    constexpr std::size_t lambda = 6 * mi; // noOffspring 5 - 7
-    std::cout << lambda << std::endl;
-    P<mi> parents;
+    const auto model = GetModelFromFile(9);
+    const std::size_t noParents = model.front().size(); // mi
+    const std::size_t noOffspring = 6 * noParents; // lambda 5 - 7
+
+    std::vector<Chromosome> parents(noParents);
 
     // Initialize with uniform distribution
     std::random_device randomDevice{};
@@ -99,7 +112,9 @@ int main() {
         return random;
     });
 
+    std::cout << parents << std::endl;
+
     //    std::cout << parents << std::endl;
-//    MeanSquaredError(model, parents);
+    std::cout << MeanSquaredError(model, parents);
     return 0;
 }
