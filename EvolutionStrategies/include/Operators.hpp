@@ -3,12 +3,13 @@
 
 #include <array>
 #include <iostream>
+#include <tuple>
 #include <type_traits>
 
 template<template<typename...> class TT, typename... T>
 std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
     if (!collection.empty()) {
-        if (std::is_scalar_v<decltype(collection.front())>) {
+        if (std::is_scalar_v<std::tuple_element_t<0, std::tuple<T...>>>) {
             stream << "[";
             for (auto value : collection) {
                 stream << value << ", ";
@@ -16,8 +17,12 @@ std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
             stream << "\b\b]\n";
         } else {
             stream << "{\n";
-            for (const auto& value : collection) {
-                stream << value << "\n\n";
+            for (auto it = collection.begin(); it != collection.end(); it++) {
+                if (std::next(it) == collection.end()) {
+                    stream << *it;
+                } else {
+                    stream << *it << "\n";
+                }
             }
             stream << "}\n";
         }
@@ -28,7 +33,7 @@ std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
 template<typename T, std::size_t N>
 std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
     if (!array.empty()) {
-        if (std::is_scalar_v<decltype(array.front())>) {
+        if (std::is_scalar_v<T>) {
             stream << "[";
             for (auto value : array) {
                 stream << value << ", ";
@@ -37,11 +42,21 @@ std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
         } else {
             stream << "{\n";
             for (const auto& value : array) {
-                stream << value << "\n\n";
+                if (&value == &array.back()) {
+                    stream << value;
+                } else {
+                    stream << value << "\n";
+                }
             }
             stream << "}\n";
         }
     }
+    return stream;
+}
+
+template<class T1, class T2>
+std::ostream& operator<<(std::ostream& stream, const std::pair<T1, T2>& pair) {
+    stream << "{\n" << pair.first << "\n" << pair.second << "}\n";
     return stream;
 }
 

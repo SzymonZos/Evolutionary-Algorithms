@@ -4,8 +4,11 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <random>
 #include <vector>
+
+#define PRINT(x) std::cout << (#x) << ": " << (x) << std::endl;
 
 static const double pi = std::acos(-1.0);
 
@@ -41,7 +44,7 @@ enum Coefficient : std::size_t { a, b, c };
 }
 
 namespace StdDev {
-enum class StandardDeviation : std::size_t { a, b, c };
+enum StandardDeviation : std::size_t { a, b, c };
 }
 
 class Chromosome {
@@ -50,6 +53,14 @@ public:
         for (std::size_t i = 0; i < 3; i++) {
             coefficients_[i] = random[i][0];
             standardDeviations_[i] = random[i][1];
+        }
+        return *this;
+    }
+
+    Chromosome& operator+=(DblMatrix<2, 3>& summand) {
+        for (std::size_t i = 0; i < 3; i++) {
+            coefficients_[i] += summand[i][0];
+            standardDeviations_[i] *= summand[i][1];
         }
         return *this;
     }
@@ -63,33 +74,47 @@ public:
 
     friend std::ostream& operator<<(std::ostream& stream,
                                     const Chromosome& data) {
-        stream << "x: {";
-        for (auto value : data.coefficients_) {
-            stream << value << ", ";
-        }
-        stream << "\b\b}\nsigma: {";
-        for (auto value : data.standardDeviations_) {
-            stream << value << ", ";
-        }
-        stream << "\b\b}\nage: " << data.age_;
+        stream << "x: " << data.coefficients_;
+        stream << "sigma: " << data.standardDeviations_;
         return stream;
     }
 
-private:
+public: // needs encapsulation, ugly workaround
     DblArray<3> coefficients_{};
     DblArray<3> standardDeviations_{};
-    std::size_t age_{};
 };
 
 double MeanSquaredError(const std::array<std::vector<double>, 2>& model,
-                        const std::vector<Chromosome>& population) {
+                        const Chromosome& chromosome) {
     double meanSquaredError = 0.0;
-    for (std::size_t i = 0; i < population.size(); i++) {
-        double error = population[i](model[Model::input][i]) -
+    for (std::size_t i = 0; i < model.front().size(); i++) {
+        double error = chromosome(model[Model::input][i]) -
                        model[Model::output][i];
-        meanSquaredError += error * error;
+        meanSquaredError += (error * error);
     }
-    return meanSquaredError / population.size();
+    //    std::cout << meanSquaredError << std::endl;
+    return meanSquaredError / static_cast<double>(model.front().size());
+}
+
+void MutateChild(Chromosome& child) {
+    using params = std::normal_distribution<double>::param_type;
+    std::random_device randomDevice{};
+    std::mt19937 rng{randomDevice()};
+    std::normal_distribution childDistribution;
+    std::normal_distribution standardDistribution{0.0, 1.0};
+    const double n = 3.0;
+    const double tau1 = 1.0 / std::sqrt(2.0 * n);
+    const double tau2 = 1.0 / std::sqrt(2.0 * std::sqrt(n));
+
+    DblMatrix<2, 3> random;
+    for (std::size_t i = 0; i < 3; i++) {
+        random[i][0] = childDistribution(
+            rng,
+            params{0.0, child.standardDeviations_[i]});
+        random[i][1] = std::exp(tau1 * standardDistribution(rng)) +
+                       std::exp(tau2 * standardDistribution(rng));
+    }
+    child += random;
 }
 
 int main() {
@@ -98,25 +123,62 @@ int main() {
     const std::size_t noOffspring = 6 * noParents; // lambda 5 - 7
 
     std::vector<Chromosome> parents(noParents);
+    std::vector<double> parentsEvaluation(noParents);
 
     // Initialize with uniform distribution
     std::random_device randomDevice{};
     std::mt19937 rng{randomDevice()};
-    std::uniform_real_distribution<> xDistribution{-10.0, 10.0};
-    std::uniform_real_distribution<> sigmaDistribution{0.0, 10.0};
+    std::uniform_real_distribution<> coefficientsDistribution{-10.0, 10.0};
+    std::uniform_real_distribution<> standardDeviationsDistribution{0.0, 10.0};
+    std::uniform_int_distribution<> parentsDistribution{
+        0,
+        static_cast<int>(noParents - 1)};
 
     std::generate(parents.begin(), parents.end(), [&] {
         DblMatrix<2, 3> random;
         for (auto& params : random) {
-            params[0] = xDistribution(rng);
-            params[1] = sigmaDistribution(rng);
+            params[0] = coefficientsDistribution(rng);
+            params[1] = standardDeviationsDistribution(rng);
         }
         return random;
     });
 
-    std::cout << parents << std::endl;
+    std::generate(parentsEvaluation.begin(), parentsEvaluation.end(), [&] {
+        static std::size_t i = 0;
+        return MeanSquaredError(model, parents[i++]);
+    });
 
-    //    std::cout << parents << std::endl;
-    std::cout << MeanSquaredError(model, parents);
+    //    std::cout << parentsEvaluation << std::endl;
+
+    std::vector<Chromosome> children(noOffspring);
+    std::generate(children.begin(), children.end(), [&] {
+        return parents[static_cast<std::size_t>(parentsDistribution(rng))];
+    });
+
+    std::for_each(children.begin(), children.end(), MutateChild);
+
+    std::vector<double> childrenEvaluation(noParents);
+    std::generate(childrenEvaluation.begin(), childrenEvaluation.end(), [&] {
+        static std::size_t i = 0;
+        return MeanSquaredError(model, children[i++]);
+    });
+
+    std::multimap<double, Chromosome> sortedPopulation{};
+    double minCostValue = 0.0;
+
+    for (std::size_t i = 0; i < noOffspring; i++) {
+        sortedPopulation.insert({childrenEvaluation[i], children[i]});
+        if (i < noParents) {
+            sortedPopulation.insert({parentsEvaluation[i], parents[i]});
+        }
+    }
+    auto it = sortedPopulation.begin();
+    std::generate(parents.begin(), parents.end(), [&] {
+        return (it++)->second;
+    });
+    minCostValue = sortedPopulation.begin()->first;
+
+    std::cout << sortedPopulation;
+
     return 0;
 }
