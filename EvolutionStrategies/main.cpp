@@ -1,34 +1,9 @@
-#include "Chromosome.hpp"
-#include "spdlog/fmt/fmt.h"
-#include <filesystem>
-#include <fstream>
+#include "EvolutionStrategies.hpp"
+#include "Model.hpp"
 #include <iostream>
 #include <map>
 #include <random>
 #include <vector>
-
-auto GetModelFromFile(std::size_t id) {
-    std::array<std::vector<double>, 2> model;
-    try {
-        std::ifstream file{
-            fmt::format("{}/models/model{}.txt", PROJECT_SOURCE_DIR, id)};
-        file.exceptions(std::ifstream::badbit | std::ifstream::failbit);
-        for (std::string line;
-             file.peek() != EOF && std::getline(file, line);) {
-            std::stringstream lineStream{line};
-            double value = 0.0;
-            for (auto& vector : model) {
-                lineStream >> value;
-                vector.push_back(value);
-            }
-        }
-    } catch (const std::ifstream::failure& exception) {
-        fmt::print("Exception: \"{}\" during opening/reading model{}.txt\n",
-                   exception.what(),
-                   id);
-    }
-    return model;
-}
 
 template<std::size_t noCoefficients>
 double MeanSquaredError(const std::array<std::vector<double>, 2>& model,
@@ -53,8 +28,8 @@ void MutateChild(ES::Chromosome<noCoefficients>& child) {
     const double tau2 = 1.0 / std::sqrt(2.0 * std::sqrt(n));
 
     ES::Chromosome<noCoefficients> random;
+    std::size_t i = 0;
     std::generate(random[ES::coeffs].begin(), random[ES::coeffs].end(), [&] {
-        static size_t i = 0;
         return childDistribution(rng, params{0.0, child[ES::stddevs][i++]});
     });
     std::generate(random[ES::stddevs].begin(), random[ES::stddevs].end(), [&] {
@@ -65,7 +40,8 @@ void MutateChild(ES::Chromosome<noCoefficients>& child) {
 }
 
 int main() {
-    const auto model = GetModelFromFile(9);
+    ES::Model heh{9};
+    const auto model = heh.GetModel();
     const std::size_t noParents = model.front().size(); // mi
     const std::size_t noOffspring = 6 * noParents; // lambda 5 - 7
     constexpr std::size_t noCoefficients = 3;
@@ -77,9 +53,9 @@ int main() {
     // Initialize with uniform distribution
     std::random_device randomDevice{};
     std::mt19937 rng{randomDevice()};
-    std::uniform_real_distribution<> coefficientsDistribution{-10.0, 10.0};
-    std::uniform_real_distribution<> standardDeviationsDistribution{0.0, 10.0};
-    std::uniform_int_distribution<> parentsDistribution{
+    std::uniform_real_distribution coefficientsDistribution{-10.0, 10.0};
+    std::uniform_real_distribution standardDeviationsDistribution{0.0, 10.0};
+    std::uniform_int_distribution parentsDistribution{
         0,
         static_cast<int>(noParents - 1)};
 
@@ -93,13 +69,12 @@ int main() {
                       [&] { return standardDeviationsDistribution(rng); });
         return random;
     });
-
+    std::size_t idx = 0;
     std::generate(parentsEvaluation.begin(), parentsEvaluation.end(), [&] {
-        static std::size_t i = 0;
-        return MeanSquaredError(model, parents[i++]);
+        return MeanSquaredError(model, parents[idx++]);
     });
 
-    //    std::cout << parentsEvaluation << std::endl;
+    std::cout << parentsEvaluation << std::endl;
 
     std::vector<Chromosome> children(noOffspring);
     std::generate(children.begin(), children.end(), [&] {
@@ -110,11 +85,13 @@ int main() {
                   children.end(),
                   MutateChild<noCoefficients>);
 
-    std::vector<double> childrenEvaluation(noParents);
+    std::vector<double> childrenEvaluation(noOffspring);
     std::generate(childrenEvaluation.begin(), childrenEvaluation.end(), [&] {
         static std::size_t i = 0;
         return MeanSquaredError(model, children[i++]);
     });
+
+    std::cout << childrenEvaluation << std::endl;
 
     std::multimap<double, Chromosome> sortedPopulation{};
     double minCostValue = 0.0;
@@ -131,7 +108,7 @@ int main() {
     });
     minCostValue = sortedPopulation.begin()->first;
 
-    std::cout << sortedPopulation << minCostValue;
+    //    std::cout << sortedPopulation << minCostValue;
 
     return 0;
 }

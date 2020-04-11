@@ -1,6 +1,6 @@
 project(EvolutionStrategies)
 
-add_executable(EvolutionStrategies main.cpp)
+add_executable(EvolutionStrategies main.cpp src/Model.cpp)
 
 target_compile_definitions(EvolutionStrategies PRIVATE
     PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
