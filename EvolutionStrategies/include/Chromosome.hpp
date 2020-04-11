@@ -4,6 +4,7 @@
 #include "Operators.hpp"
 #include "Types.hpp"
 #include <cmath>
+#include <initializer_list>
 #include <tuple>
 
 namespace ES {
@@ -16,6 +17,10 @@ class Chromosome {
 public:
     Chromosome() = default;
     ~Chromosome() = default;
+
+    Chromosome(const std::initializer_list<DblArray<size>>& list) :
+        coefficients_{list.begin()[coeffs]},
+        standardDeviations_{list.begin()[stddevs]} {}
 
     Chromosome(const Chromosome& other) :
         coefficients_{other.coefficients_},
@@ -54,6 +59,7 @@ public:
         case stddevs:
             return standardDeviations_;
         }
+        throw std::invalid_argument("Nice operator[] bro");
     }
 
     double operator()(double input) const {
