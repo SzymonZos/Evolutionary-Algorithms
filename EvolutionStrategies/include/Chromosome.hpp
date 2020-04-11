@@ -1,14 +1,14 @@
 #ifndef EVOLUTIONARYALGORITHMS_CHROMOSOME_HPP
 #define EVOLUTIONARYALGORITHMS_CHROMOSOME_HPP
 
+#include "Math.hpp"
 #include "Operators.hpp"
 #include "Types.hpp"
-#include <cmath>
+
 #include <initializer_list>
 #include <tuple>
 
 namespace ES {
-enum Model : std::size_t { in, out };
 enum Coefficient : std::size_t { a, b, c };
 enum ChromosomeVector : std::size_t { coeffs, stddevs };
 
