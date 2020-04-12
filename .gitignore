@@ -46,3 +46,6 @@ venv/
 !CMake*.txt
 !model*.txt
 *.csv*
+
+EvolutionStrategies/PythonDraft/venv
+EvolutionStrategies/PythonDraft/.idea
