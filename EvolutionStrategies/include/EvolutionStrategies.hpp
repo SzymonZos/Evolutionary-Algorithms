@@ -1,8 +1,6 @@
 #ifndef EVOLUTIONARYALGORITHMS_EVOLUTIONSTRATEGIES_HPP
 #define EVOLUTIONARYALGORITHMS_EVOLUTIONSTRATEGIES_HPP
 
-#include <utility>
-
 #include "Chromosome.hpp"
 #include "Distributions.hpp"
 #include "Model.hpp"
@@ -35,9 +33,15 @@ public:
 
     void Run() {
         InitializePopulation();
-        auto parentsEvaluation = Evaluate(population_.parents);
-        CreateOffspring();
-        auto offspringEvaluation = Evaluate(population_.offspring);
+        do {
+            population_.parentsEvaluation = Evaluate(population_.parents);
+            CreateOffspring();
+            population_.offspringEvaluation = Evaluate(population_.offspring);
+        } while (ReplacePopulation() >= 2);
+    }
+
+    Chromosome<noCoefficients> GetResult() {
+        return population_.parents[0];
     }
 
 private:
@@ -55,6 +59,7 @@ private:
 
     void InitializePopulation() {
         auto& parents = population_.parents;
+
         std::generate(parents.begin(), parents.end(), [&] {
             ES::Chromosome<noCoefficients> random;
             std::generate(random[coeffs].begin(), random[coeffs].end(), [&] {
@@ -71,6 +76,7 @@ private:
         using params = Distributions::params;
         Chromosome<noCoefficients> random{};
         std::size_t i = 0;
+
         std::generate(random[coeffs].begin(), random[coeffs].end(), [&] {
             return distributions_.child(rng_, params{0, child[stddevs][i++]});
         });
@@ -83,6 +89,7 @@ private:
 
     double MeanSquaredError(const Chromosome<noCoefficients>& chromosome) {
         double meanSquaredError = 0.0;
+
         for (std::size_t i = 0; i < population_.noParents; i++) {
             double error = chromosome(model_[in][i]) - model_[out][i];
             meanSquaredError += (error * error);
@@ -93,6 +100,7 @@ private:
     auto Evaluate(const std::vector<Chromosome<noCoefficients>>& population) {
         std::vector<double> evaluation(population.size());
         std::size_t idx = 0;
+
         std::generate(evaluation.begin(), evaluation.end(), [&] {
             return MeanSquaredError(population[idx++]);
         });
@@ -101,29 +109,48 @@ private:
 
     void CreateOffspring() {
         auto& offspring = population_.offspring;
-        std::generate(offspring.begin(), offspring.end(), [&] {
-            return population_.parents[distributions_.parent(rng_)];
-        });
         auto MutateChild = std::bind(&EvolutionStrategies::MutateChild,
                                      this,
                                      std::placeholders::_1);
+
+        std::generate(offspring.begin(), offspring.end(), [&] {
+            return population_.parents[distributions_.parent(rng_)];
+        });
         std::for_each(offspring.begin(), offspring.end(), MutateChild);
     }
 
     void SortPopulation() {
+        auto& offspring = population_.offspring;
+        auto& offspringEval = population_.offspringEvaluation;
+        auto& sorted = population_.sorted;
+
         for (std::size_t i = 0; i < population_.noOffspring; i++) {
-            population_.sorted.insert(
-                {population_.childrenEvaluation[i], population_.children[i]});
-            if (i < population_.noParents) {
-                sortedPopulation.insert({population_.parentsEvaluation[i],
-                                         population_.parents[i]});
+            sorted.insert({offspringEval[i], offspring[i]});
+            switch (strategyType_) {
+            case StrategyType::parentsAndOffspring:
+                if (i < population_.noParents) {
+                    sorted.insert({population_.parentsEvaluation[i],
+                                   population_.parents[i]});
+                }
+                break;
+            case StrategyType::offspring:
+                break;
             }
         }
     }
 
-    void ReplacePopulation() {
-        minCostValue_ = sortedPopulation_.begin()->first;
-        sortedPopulation_.clear();
+    double ReplacePopulation() {
+        auto it = population_.sorted.begin();
+        auto& parents = population_.parents;
+
+        SortPopulation();
+        std::generate(parents.begin(), parents.end(), [&] {
+            return (it++)->second;
+        });
+        double minMse = population_.sorted.begin()->first;
+        std::cout << minMse << std::endl;
+        population_.sorted.clear();
+        return minMse;
     }
 };
 } // namespace ES
