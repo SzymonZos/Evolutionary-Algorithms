@@ -27,7 +27,7 @@ void MutateChild(ES::Chromosome<noCoefficients>& child) {
     const double tau1 = 1.0 / std::sqrt(2.0 * n);
     const double tau2 = 1.0 / std::sqrt(2.0 * std::sqrt(n));
 
-    ES::Chromosome<noCoefficients> random;
+    ES::Chromosome<noCoefficients> random{};
     std::size_t i = 0;
     std::generate(random[ES::coeffs].begin(), random[ES::coeffs].end(), [&] {
         return childDistribution(rng, params{0.0, child[ES::stddevs][i++]});
