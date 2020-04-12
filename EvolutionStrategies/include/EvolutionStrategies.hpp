@@ -6,8 +6,10 @@
 #include "Chromosome.hpp"
 #include "Distributions.hpp"
 #include "Model.hpp"
+#include "Population.hpp"
 
 namespace ES {
+enum class StrategyType : std::size_t { parentsAndOffspring, offspring };
 
 template<std::size_t noCoefficients>
 class EvolutionStrategies {
@@ -22,46 +24,44 @@ public:
     EvolutionStrategies& operator=(EvolutionStrategies&& other) = delete;
 
     EvolutionStrategies(std::array<std::vector<double>, 2> model,
-                        std::size_t offspringFactor) :
+                        std::size_t offspringFactor,
+                        StrategyType strategyType) :
         model_{std::move(model)},
-        noParents_{model_.front().size()},
-        noOffspring_{offspringFactor * noParents_},
-        parents_{noParents_},
-        offspring_{noOffspring_},
-        distributions_{noParents_} {
+        population_{model_.front().size(), offspringFactor},
+        strategyType_{strategyType},
+        distributions_{population_.noParents} {
         Run();
     }
 
     void Run() {
         InitializePopulation();
-        auto parentsEvaluation = Evaluate(parents_);
+        auto parentsEvaluation = Evaluate(population_.parents);
         CreateOffspring();
-        auto offspringEvaluation = Evaluate(offspring_);
+        auto offspringEvaluation = Evaluate(population_.offspring);
     }
 
 private:
-    static constexpr double n_ = 3.0;
+    static constexpr double n_ = noCoefficients;
     static constexpr double tau1_ = 1.0 / CtSqrt(2.0 * n_);
     static constexpr double tau2_ = 1.0 / CtSqrt(2.0 * CtSqrt(n_));
 
     std::array<std::vector<double>, 2> model_;
-    std::size_t noParents_;
-    std::size_t noOffspring_;
-    std::vector<Chromosome<noCoefficients>> parents_;
-    std::vector<Chromosome<noCoefficients>> offspring_;
+    Population<noCoefficients> population_;
+    StrategyType strategyType_;
 
     std::random_device randomDevice_{};
     std::mt19937 rng_{randomDevice_()};
     Distributions distributions_;
 
     void InitializePopulation() {
-        std::generate(parents_.begin(), parents_.end(), [&] {
+        auto& parents = population_.parents;
+        std::generate(parents.begin(), parents.end(), [&] {
             ES::Chromosome<noCoefficients> random;
             std::generate(random[coeffs].begin(), random[coeffs].end(), [&] {
-                return distributions_.coefficients(rng_);
+                return distributions_.coefficient(rng_);
             });
             std::generate(random[stddevs].begin(), random[stddevs].end(), [&] {
-                return distributions_.standardDeviations(rng_);
+                return distributions_.standardDeviation(rng_);
             });
             return random;
         });
@@ -83,30 +83,47 @@ private:
 
     double MeanSquaredError(const Chromosome<noCoefficients>& chromosome) {
         double meanSquaredError = 0.0;
-        for (std::size_t i = 0; i < model_.front().size(); i++) {
+        for (std::size_t i = 0; i < population_.noParents; i++) {
             double error = chromosome(model_[in][i]) - model_[out][i];
             meanSquaredError += (error * error);
         }
-        return meanSquaredError / static_cast<double>(model_.front().size());
+        return meanSquaredError / static_cast<double>(population_.noParents);
     }
 
     auto Evaluate(const std::vector<Chromosome<noCoefficients>>& population) {
         std::vector<double> evaluation(population.size());
         std::size_t idx = 0;
         std::generate(evaluation.begin(), evaluation.end(), [&] {
-            return MeanSquaredError(model_, population[idx++]);
+            return MeanSquaredError(population[idx++]);
         });
         return evaluation;
     }
 
     void CreateOffspring() {
-        std::generate(offspring_.begin(), offspring_.end(), [&] {
-            return parents_[parentsDistribution(rng_)];
+        auto& offspring = population_.offspring;
+        std::generate(offspring.begin(), offspring.end(), [&] {
+            return population_.parents[distributions_.parent(rng_)];
         });
         auto MutateChild = std::bind(&EvolutionStrategies::MutateChild,
                                      this,
                                      std::placeholders::_1);
-        std::for_each(offspring_.begin(), offspring_.end(), MutateChild);
+        std::for_each(offspring.begin(), offspring.end(), MutateChild);
+    }
+
+    void SortPopulation() {
+        for (std::size_t i = 0; i < population_.noOffspring; i++) {
+            population_.sorted.insert(
+                {population_.childrenEvaluation[i], population_.children[i]});
+            if (i < population_.noParents) {
+                sortedPopulation.insert({population_.parentsEvaluation[i],
+                                         population_.parents[i]});
+            }
+        }
+    }
+
+    void ReplacePopulation() {
+        minCostValue_ = sortedPopulation_.begin()->first;
+        sortedPopulation_.clear();
     }
 };
 } // namespace ES

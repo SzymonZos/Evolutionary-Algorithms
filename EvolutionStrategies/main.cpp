@@ -109,6 +109,9 @@ int main() {
     minCostValue = sortedPopulation.begin()->first;
 
     //    std::cout << sortedPopulation << minCostValue;
-
+    ES::EvolutionStrategies<noCoefficients> strategies{
+        model,
+        6,
+        ES::StrategyType::parentsAndOffspring};
     return 0;
 }
