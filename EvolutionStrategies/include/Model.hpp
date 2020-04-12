@@ -10,6 +10,7 @@ enum ModelIO : std::size_t { in, out };
 
 class Model {
 public:
+    using Type = std::array<std::vector<double>, 2>;
     Model() = delete;
     ~Model() = default;
 
@@ -26,7 +27,7 @@ private:
     static constexpr const char* directoryPath_ = PROJECT_SOURCE_DIR "/models";
     std::string fullPath_;
     std::ifstream file_;
-    std::array<std::vector<double>, 2> model_{};
+    Type model_{};
 
     void HandleFileRead();
     void ReadFromFile();

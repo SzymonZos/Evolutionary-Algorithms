@@ -5,9 +5,9 @@
 #include "Distributions.hpp"
 #include "Model.hpp"
 #include "Population.hpp"
+#include "StopConditions.hpp"
 
 namespace ES {
-enum class StrategyType : std::size_t { parentsAndOffspring, offspring };
 
 template<std::size_t noCoefficients>
 class EvolutionStrategies {
@@ -21,12 +21,12 @@ public:
     EvolutionStrategies(EvolutionStrategies&& other) = delete;
     EvolutionStrategies& operator=(EvolutionStrategies&& other) = delete;
 
-    EvolutionStrategies(std::array<std::vector<double>, 2> model,
-                        std::size_t offspringFactor,
-                        StrategyType strategyType) :
+    explicit EvolutionStrategies(Model::Type model,
+                                 PopulationSize populationSize = defaultPop,
+                                 StopConditions stopConditions = defaultStop) :
         model_{std::move(model)},
-        population_{model_.front().size(), offspringFactor},
-        strategyType_{strategyType},
+        population_{populationSize},
+        stopConditions_{stopConditions},
         distributions_{population_.noParents} {
         Run();
     }
@@ -34,10 +34,12 @@ public:
     void Run() {
         InitializePopulation();
         do {
+            stopConditions_.iteration++;
             population_.parentsEvaluation = Evaluate(population_.parents);
             CreateOffspring();
             population_.offspringEvaluation = Evaluate(population_.offspring);
-        } while (ReplacePopulation() >= 0.3);
+            ReplacePopulation();
+        } while (stopConditions_.notAchieved());
     }
 
     Chromosome<noCoefficients> GetResult() {
@@ -49,9 +51,9 @@ private:
     static constexpr double tau1_ = 1.0 / CtSqrt(2.0 * n_);
     static constexpr double tau2_ = 1.0 / CtSqrt(2.0 * CtSqrt(n_));
 
-    std::array<std::vector<double>, 2> model_;
+    Model::Type model_;
     Population<noCoefficients> population_;
-    StrategyType strategyType_;
+    StopConditions stopConditions_;
 
     std::random_device randomDevice_{};
     std::mt19937 rng_{randomDevice_()};
@@ -126,7 +128,7 @@ private:
 
         for (std::size_t i = 0; i < population_.noOffspring; i++) {
             sorted.insert({offspringEval[i], offspring[i]});
-            switch (strategyType_) {
+            switch (population_.strategyType) {
             case StrategyType::parentsAndOffspring:
                 if (i < population_.noParents) {
                     sorted.insert({population_.parentsEvaluation[i],
@@ -139,7 +141,7 @@ private:
         }
     }
 
-    double ReplacePopulation() {
+    void ReplacePopulation() {
         auto& parents = population_.parents;
 
         SortPopulation();
@@ -147,9 +149,13 @@ private:
         std::generate(parents.begin(), parents.end(), [&] {
             return (it++)->second;
         });
-        double minMse = population_.sorted.begin()->first;
+        if (population_.sorted.begin()->first == stopConditions_.mse) {
+            stopConditions_.noConsecutiveSameMse++;
+        } else {
+            stopConditions_.noConsecutiveSameMse = 0;
+        }
+        stopConditions_.mse = population_.sorted.begin()->first;
         population_.sorted.clear();
-        return minMse;
     }
 };
 } // namespace ES

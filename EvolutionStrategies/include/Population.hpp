@@ -6,16 +6,25 @@
 #include <vector>
 
 namespace ES {
+enum class StrategyType : std::size_t { parentsAndOffspring, offspring };
+
+struct PopulationSize {
+    std::size_t noParents = 100;
+    double offspringFactor = 6;
+    StrategyType strategyType = StrategyType::parentsAndOffspring;
+} defaultPop;
 
 template<std::size_t noCoefficients>
 struct Population {
-    Population(std::size_t size, std::size_t offspringFactor) :
-        noParents{size},
-        noOffspring{offspringFactor * noParents},
+    explicit Population(PopulationSize size) :
+        noParents{size.noParents},
+        noOffspring{static_cast<std::size_t>(size.offspringFactor *
+                                             static_cast<double>(noParents))},
         parents(noParents),
         offspring(noOffspring),
         parentsEvaluation(noParents),
-        offspringEvaluation(noOffspring) {}
+        offspringEvaluation(noOffspring),
+        strategyType{size.strategyType} {}
 
     std::size_t noParents;
     std::size_t noOffspring;
@@ -24,6 +33,7 @@ struct Population {
     std::vector<double> parentsEvaluation;
     std::vector<double> offspringEvaluation;
     std::multimap<double, Chromosome<noCoefficients>> sorted{};
+    StrategyType strategyType;
 };
 } // namespace ES
 

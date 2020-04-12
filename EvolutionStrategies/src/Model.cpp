@@ -8,7 +8,7 @@ Model::Model(std::size_t id) :
     HandleFileRead();
 }
 
-std::array<std::vector<double>, 2> Model::GetModel() const {
+Model::Type Model::GetModel() const {
     return model_;
 }
 

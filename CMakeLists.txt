@@ -19,7 +19,7 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
 endif()
 
 add_compile_options(
-#    -Werror
+    -Werror
     -Wall
     -Wextra
     -Wshadow # Warn if variable overshadows parent context

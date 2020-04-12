@@ -7,17 +7,14 @@
 namespace plt = matplotlibcpp;
 
 template<std::size_t noCoefficients>
-auto FirstTask(const std::array<std::vector<double>, 2>& model) {
+auto FirstTask(const ES::Model::Type& model) {
     Timer timer;
-    ES::EvolutionStrategies<noCoefficients> strategies{
-        model,
-        6,
-        ES::StrategyType::offspring};
+    ES::EvolutionStrategies<noCoefficients> strategies{model};
     return strategies.GetResult();
 }
 
 template<std::size_t noCoefficients>
-void PlotResults(const std::array<std::vector<double>, 2>& model,
+void PlotResults(const ES::Model::Type& model,
                  const ES::Chromosome<noCoefficients>& result) {
     std::vector<double> resultOutput(model.front().size());
     std::size_t i = 0;
