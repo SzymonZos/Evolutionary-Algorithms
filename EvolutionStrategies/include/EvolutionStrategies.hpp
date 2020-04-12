@@ -37,7 +37,7 @@ public:
             population_.parentsEvaluation = Evaluate(population_.parents);
             CreateOffspring();
             population_.offspringEvaluation = Evaluate(population_.offspring);
-        } while (ReplacePopulation() >= 2);
+        } while (ReplacePopulation() >= 0.3);
     }
 
     Chromosome<noCoefficients> GetResult() {
@@ -81,7 +81,7 @@ private:
             return distributions_.child(rng_, params{0, child[stddevs][i++]});
         });
         std::generate(random[stddevs].begin(), random[stddevs].end(), [&] {
-            return std::exp(tau1_ * distributions_.standard(rng_)) +
+            return std::exp(tau1_ * distributions_.standard(rng_)) *
                    std::exp(tau2_ * distributions_.standard(rng_));
         });
         child += random;
@@ -90,11 +90,11 @@ private:
     double MeanSquaredError(const Chromosome<noCoefficients>& chromosome) {
         double meanSquaredError = 0.0;
 
-        for (std::size_t i = 0; i < population_.noParents; i++) {
+        for (std::size_t i = 0; i < model_.front().size(); i++) {
             double error = chromosome(model_[in][i]) - model_[out][i];
             meanSquaredError += (error * error);
         }
-        return meanSquaredError / static_cast<double>(population_.noParents);
+        return meanSquaredError / static_cast<double>(model_.front().size());
     }
 
     auto Evaluate(const std::vector<Chromosome<noCoefficients>>& population) {
@@ -140,15 +140,14 @@ private:
     }
 
     double ReplacePopulation() {
-        auto it = population_.sorted.begin();
         auto& parents = population_.parents;
 
         SortPopulation();
+        auto it = population_.sorted.begin();
         std::generate(parents.begin(), parents.end(), [&] {
             return (it++)->second;
         });
         double minMse = population_.sorted.begin()->first;
-        std::cout << minMse << std::endl;
         population_.sorted.clear();
         return minMse;
     }
