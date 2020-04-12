@@ -10,13 +10,13 @@ namespace ES {
 enum Coefficient : std::size_t { a, b, c };
 enum ChromosomeVector : std::size_t { coeffs, stddevs };
 
-template<std::size_t size>
+template<std::size_t noCoefficients>
 class Chromosome {
 public:
     Chromosome() = default;
     ~Chromosome() = default;
 
-    Chromosome(const std::initializer_list<DblArray<size>>& list) :
+    Chromosome(const std::initializer_list<DblArray<noCoefficients>>& list) :
         coefficients_{list.begin()[coeffs]},
         standardDeviations_{list.begin()[stddevs]} {}
 
@@ -50,7 +50,7 @@ public:
         return *this;
     }
 
-    DblArray<size>& operator[](ChromosomeVector vector) {
+    DblArray<noCoefficients>& operator[](ChromosomeVector vector) {
         switch (vector) {
         case coeffs:
             return coefficients_;
@@ -74,8 +74,8 @@ public:
     }
 
 private:
-    DblArray<size> coefficients_{};
-    DblArray<size> standardDeviations_{};
+    DblArray<noCoefficients> coefficients_{};
+    DblArray<noCoefficients> standardDeviations_{};
     inline static const double pi_ = std::acos(-1.0);
 };
 } // namespace ES

@@ -6,33 +6,34 @@
 
 namespace plt = matplotlibcpp;
 
-template<std::size_t noAlleles>
-void PlotFirstTask(const DblArray<noAlleles>& x,
-                   const DblArray<noAlleles>& y,
-                   const IntArray<noAlleles>& result) {
-    std::vector<double> xPlot, yPlot;
-    xPlot.reserve(noAlleles + 1);
-    yPlot.reserve(noAlleles + 1);
-    for (std::size_t i = 0; i < noAlleles; i++) {
-        xPlot.push_back(x[result[i]]);
-        yPlot.push_back(y[result[i]]);
-        plt::annotate(std::to_string(result[i]), xPlot[i] + 0.2, yPlot[i]);
-    }
-    xPlot.push_back(x[result[0]]);
-    yPlot.push_back(y[result[0]]);
-    plt::scatter(xPlot, yPlot, 100.0, {{"c", "red"}, {"marker", "*"}});
-    plt::plot(xPlot, yPlot);
+template<std::size_t noCoefficients>
+auto FirstTask(const std::array<std::vector<double>, 2>& model) {
+    Timer timer;
+    ES::EvolutionStrategies<noCoefficients> strategies{
+        model,
+        6,
+        ES::StrategyType::offspring};
+    return strategies.GetResult();
+}
+
+template<std::size_t noCoefficients>
+void PlotResults(const std::array<std::vector<double>, 2>& model,
+                 const ES::Chromosome<noCoefficients>& result) {
+    std::vector<double> resultOutput(model.front().size());
+    std::size_t i = 0;
+    std::generate(resultOutput.begin(), resultOutput.end(), [&] {
+        return result(model[ES::in][i++]);
+    });
+    plt::plot(model[ES::in], resultOutput, {{"c", "blue"}});
+    plt::plot(model[ES::in], model[ES::out], {{"c", "red"}});
     plt::show();
 }
 
 int main() {
-    Timer timer;
     ES::Model model{9};
     constexpr std::size_t noCoefficients = 3;
-    ES::EvolutionStrategies<noCoefficients> strategies{
-        model.GetModel(),
-        6,
-        ES::StrategyType::parentsAndOffspring};
-    std::cout << strategies.GetResult();
+    auto results = FirstTask<noCoefficients>(model.GetModel());
+    std::cout << results << std::endl;
+    PlotResults<noCoefficients>(model.GetModel(), results);
     return 0;
 }
