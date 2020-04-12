@@ -4,9 +4,7 @@
 #include "Math.hpp"
 #include "Operators.hpp"
 #include "Types.hpp"
-
 #include <initializer_list>
-#include <tuple>
 
 namespace ES {
 enum Coefficient : std::size_t { a, b, c };
