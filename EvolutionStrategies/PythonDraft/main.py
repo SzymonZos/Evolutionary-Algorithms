@@ -3,7 +3,8 @@ from matplotlib import pyplot
 from math import cos, pi, sqrt, exp
 from collections import defaultdict
 
-
+POPULATION = {'names': ('a', 'b', 'c', 'std_dev_a', 'std_dev_b', 'std_dev_c'),
+              'formats': ('float64','float64','float64','float64','float64','float64')}
 def open_file_and_process_data():
     file = numpy.loadtxt("model9.txt", dtype={'names': ('we','wy'), 'formats': ('float64', 'float64')})
     return file
@@ -23,8 +24,7 @@ def modeling_function(no_population, file_data, population_vector):
 
 def gererate_chromosomes(low, high, number_of_elements):
     col_names = ['a', 'b', 'c', 'std_dev_a', 'std_dev_b', 'std_dev_c']
-    population_vector = numpy.empty([number_of_elements], dtype={'names': ('a', 'b', 'c', 'std_dev_a', 'std_dev_b', 'std_dev_c'),
-                                                        'formats': ('float64','float64','float64','float64','float64','float64')})
+    population_vector = numpy.empty([number_of_elements], dtype=POPULATION)
     for i in range(len(col_names[0:3])):
         #abc_std_dev_vec.append(numpy.random.uniform(low, high, number_of_elements))
         population_vector[:][col_names[i]] = numpy.random.uniform(low, high, number_of_elements).transpose()
@@ -52,8 +52,7 @@ def create_offspring_population(no_parents, no_offspring, chromosome_vector):
     random_numbers = numpy.random.randint(0, no_parents - 1, no_offspring)
     # offspring_population = defaultdict(list)
     offspring_population = numpy.empty([no_offspring],
-                                    dtype={'names': ('a', 'b', 'c', 'std_dev_a', 'std_dev_b', 'std_dev_c'),
-                                           'formats': ('float64', 'float64', 'float64', 'float64', 'float64', 'float64')})
+                                    dtype=POPULATION)
 
     word_map = {"a", "b", "c", "std_dev_a", "std_dev_b", "std_dev_c"}
     index = 0
@@ -85,10 +84,8 @@ def mutate_population(n, no_offspring, offspring_population):
 def create_new_population(offsprin_error, parent_error, no_parents, parent_population, offspring_population):
     concatenated_array = numpy.concatenate((parent_error, offsprin_error), axis=0)
     concatenated_array = concatenated_array[concatenated_array[:, 0].argsort()]
-    print(concatenated_array[1][:])
-    new_population = numpy.empty([no_parents], dtype={'names': ('a', 'b', 'c', 'std_dev_a', 'std_dev_b', 'std_dev_c'),
-                                                      'formats': ('float64', 'float64', 'float64', 'float64', 'float64',
-                                                                  'float64')})
+    #print(concatenated_array[1][:])
+    new_population = numpy.empty([no_parents], dtype=POPULATION)
 
     word_map = ["a", "b", "c", "std_dev_a", "std_dev_b", "std_dev_c"]
     for i in range(no_parents):
@@ -104,10 +101,11 @@ def main():
     no_offspring = no_parents*6
     data = open_file_and_process_data()
     chromosome_vector = gererate_chromosomes(low, high, no_parents)
-    STOP_CRIT = 2
+    STOP_CRIT = 0.3
+    values_index = 0
     stop = False
     while True:
-
+        iterations += 1
         aggregated_values = modeling_function(no_parents, data, chromosome_vector)
 
         error_parent_list = evaluate_population(aggregated_values, data)
@@ -131,12 +129,25 @@ def main():
             if error[0] < STOP_CRIT:
                 stop = True
                 print(error)
+                values_index = error[1]
                 break
         if stop:
             break
 
+    #print_values=  modeling_function(1, data, offspring_population[int(values_index)])
 
 
+
+    function_values = numpy.empty(len(data))
+    for i in range(len(data)):
+        function_values[i] = offspring_population[int(values_index)]["a"] * (data[i][0] ** 2 -
+                                                  offspring_population[int(values_index)]["b"] *
+                                                  cos(offspring_population[int(values_index)]["c"] * pi * data[i][0]))
+    pyplot.plot(data['we'], data['wy'], "r--", data['we'], function_values, "g^")
+    pyplot.show()
+    print(iterations)
+    print("vector x: " + str(offspring_population[int(values_index)]))
+    a=1
     #In the (µ, λ) strategy Q = ∅ and in the (µ + λ) strategy Q = P(t)µ
 if __name__ == "__main__":
     main()
