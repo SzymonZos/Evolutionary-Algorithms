@@ -7,7 +7,7 @@ POPULATION = {'names': ('a', 'b', 'c', 'std_dev_a', 'std_dev_b', 'std_dev_c'),
 
 
 def open_file_and_process_data(file_name):
-    file = numpy.loadtxt(file_name, dtype={'names': ('we','wy'), 'formats': ('float64', 'float64')})
+    file = numpy.loadtxt(file_name, dtype={'names': ('we', 'wy'), 'formats': ('float64', 'float64')})
     return file
 
 
@@ -23,7 +23,7 @@ class Population:
         self.offspring_population = numpy.empty([self.offspring_size], dtype=POPULATION)
         self.col_names = ['a', 'b', 'c', 'std_dev_a', 'std_dev_b', 'std_dev_c']
 
-    def initialize_population(self, min_value, max_value, std_dev):
+    def initialize(self, min_value, max_value, std_dev):
         for i in range(len(self.col_names[0:3])):
             self.population_vector[:][self.col_names[i]] = numpy.random.uniform(min_value, max_value,
                                                                                 self.parent_size).transpose()
@@ -48,7 +48,7 @@ class Population:
             aggregated_function_values[j][:] = function_values
         return aggregated_function_values
 
-    def evaluate_population(self, aggregated_function_values):
+    def evaluate(self, aggregated_function_values):
         error_list = numpy.empty([len(aggregated_function_values), 3])
         index = 0
         for value_vector in aggregated_function_values:
@@ -61,7 +61,7 @@ class Population:
             index += 1
         return error_list
 
-    def create_offspring_population(self):
+    def create_offspring(self):
         random_numbers = numpy.random.randint(0, self.parent_size - 1, self.offspring_size)
         index = 0
         for number in random_numbers:
@@ -84,7 +84,7 @@ class Population:
                 ro_2 = tau_2 * numpy.random.normal(0, 1, 1)
                 self.offspring_population[i][word] = self.offspring_population[i][word] * exp(ro_1) * exp(ro_2)
 
-    def create_new_population(self, parent_error, offspring_error):
+    def create_new(self, parent_error, offspring_error):
         parent_error[:, 2] = 1
         offspring_error[:, 2] = 0
         concatenated_array = numpy.concatenate((parent_error, offspring_error), axis=0)
@@ -107,14 +107,27 @@ class Population:
                 break
         return statement
 
-    def print_population(self):
+    def print(self, plot_graph):
         function_values = numpy.empty(len(self.file_data))
         for i in range(len(self.file_data)):
             function_values[i] = self.offspring_population[int(self.print_index)]["a"] * (self.file_data[i][0] ** 2 -
                                  self.offspring_population[int(self.print_index)]["b"] *
                                  cos(self.offspring_population[int(self.print_index)]["c"] * pi * self.file_data[i][0]))
-        pyplot.plot(self.file_data['we'], self.file_data['wy'], "r--", self.file_data['we'], function_values, "g^")
-        pyplot.show()
+        if plot_graph:
+            pyplot.plot(self.file_data['we'], self.file_data['wy'], "r--", self.file_data['we'], function_values, "g^")
+            pyplot.show()
         print("Iterations: " + str(self.iterations))
         print("vector x: " + str(self.offspring_population[int(self.print_index)]))
 
+    def run(self):
+        while True:
+            self.iterations += 1
+            parents_function_values = self.modeling_function("parents")
+            parents_error = self.evaluate(parents_function_values)
+            self.create_offspring()
+            self.mutate_population(3)
+            offspring_function_values = self.modeling_function("offspring")
+            offspring_error = self.evaluate(offspring_function_values)
+            self.create_new(parents_error, offspring_error)
+            if self.is_stop_criteria_fulfilled(offspring_error):
+                break
