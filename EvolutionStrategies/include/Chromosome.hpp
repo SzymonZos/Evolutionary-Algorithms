@@ -57,7 +57,8 @@ public:
         case stddevs:
             return standardDeviations_;
         }
-        throw std::invalid_argument("Nice operator[] bro");
+        throw std::invalid_argument(
+            "Chromosome operator[]: Cannot requested index");
     }
 
     double operator()(double input) const {

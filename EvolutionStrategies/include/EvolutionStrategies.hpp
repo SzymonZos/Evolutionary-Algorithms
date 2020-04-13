@@ -6,12 +6,15 @@
 #include "Model.hpp"
 #include "Population.hpp"
 #include "StopConditions.hpp"
+#include <tuple>
 
 namespace ES {
 
 template<std::size_t noCoefficients>
 class EvolutionStrategies {
 public:
+    using GivenChromosome = Chromosome<noCoefficients>;
+
     EvolutionStrategies() = delete;
     ~EvolutionStrategies() = default;
 
@@ -39,11 +42,14 @@ public:
             CreateOffspring();
             population_.offspringEvaluation = Evaluate(population_.offspring);
             ReplacePopulation();
+            std::cout << stopConditions_.mse << std::endl;
         } while (stopConditions_.notAchieved());
     }
 
-    Chromosome<noCoefficients> GetResult() {
-        return population_.parents[0];
+    std::tuple<GivenChromosome, double, std::size_t> GetResults() const {
+        return {population_.parents[0],
+                stopConditions_.mse,
+                stopConditions_.iteration};
     }
 
 private:
@@ -63,7 +69,7 @@ private:
         auto& parents = population_.parents;
 
         std::generate(parents.begin(), parents.end(), [&] {
-            ES::Chromosome<noCoefficients> random;
+            GivenChromosome random;
             std::generate(random[coeffs].begin(), random[coeffs].end(), [&] {
                 return distributions_.coefficient(rng_);
             });
@@ -74,9 +80,9 @@ private:
         });
     }
 
-    void MutateChild(Chromosome<noCoefficients>& child) {
+    void MutateChild(GivenChromosome& child) {
         using params = Distributions::params;
-        Chromosome<noCoefficients> random{};
+        GivenChromosome random{};
         std::size_t i = 0;
 
         std::generate(random[coeffs].begin(), random[coeffs].end(), [&] {
@@ -89,7 +95,7 @@ private:
         child += random;
     }
 
-    double MeanSquaredError(const Chromosome<noCoefficients>& chromosome) {
+    double MeanSquaredError(const GivenChromosome& chromosome) const {
         double meanSquaredError = 0.0;
 
         for (std::size_t i = 0; i < model_.front().size(); i++) {
@@ -99,7 +105,7 @@ private:
         return meanSquaredError / static_cast<double>(model_.front().size());
     }
 
-    auto Evaluate(const std::vector<Chromosome<noCoefficients>>& population) {
+    auto Evaluate(const std::vector<GivenChromosome>& population) const {
         std::vector<double> evaluation(population.size());
         std::size_t idx = 0;
 
