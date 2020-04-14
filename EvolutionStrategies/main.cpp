@@ -3,17 +3,23 @@
 #include "Timer.hpp"
 #include "matplotlibcpp.h"
 #include <iostream>
+#include <spdlog/sinks/rotating_file_sink.h>
 
 namespace plt = matplotlibcpp;
 
 template<std::size_t noCoefficients>
 auto FirstTask(const ES::Model::Type& model) {
+    auto logger = spdlog::rotating_logger_mt("results",
+                                             "logs/results.csv",
+                                             1048576 * 5,
+                                             1,
+                                             true);
     Timer timer;
     ES::EvolutionStrategies<noCoefficients> strategies{
         model,
         {200, 7, ES::StrategyType::offspring},
-        {0.3, 5, 100}};
-
+        {0.3, 5, 100},
+        logger};
     return strategies.GetResults();
 }
 

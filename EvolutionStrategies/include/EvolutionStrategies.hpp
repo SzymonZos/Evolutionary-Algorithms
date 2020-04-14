@@ -6,9 +6,13 @@
 #include "Model.hpp"
 #include "Population.hpp"
 #include "StopConditions.hpp"
+#include <magic_enum.hpp>
+#include <memory>
+#include <spdlog/logger.h>
 #include <tuple>
 
 namespace ES {
+using spdlog::logger;
 
 template<std::size_t noCoefficients>
 class EvolutionStrategies {
@@ -26,24 +30,26 @@ public:
 
     explicit EvolutionStrategies(Model::Type model,
                                  PopulationSize populationSize = defaultPop,
-                                 StopConditions stopConditions = defaultStop) :
+                                 StopConditions stopConditions = defaultStop,
+                                 std::shared_ptr<logger> logger = nullptr) :
         model_{std::move(model)},
         population_{populationSize},
         stopConditions_{stopConditions},
-        distributions_{population_.noParents} {
+        distributions_{population_.noParents},
+        logger_{std::move(logger)} {
         Run();
     }
 
     void Run() {
         InitializePopulation();
         do {
-            stopConditions_.iteration++;
             population_.parentsEvaluation = Evaluate(population_.parents);
             CreateOffspring();
             population_.offspringEvaluation = Evaluate(population_.offspring);
             ReplacePopulation();
-            std::cout << stopConditions_.mse << std::endl;
+            LogCurrentIteration();
         } while (stopConditions_.notAchieved());
+        LogResults();
     }
 
     std::tuple<GivenChromosome, double, std::size_t> GetResults() const {
@@ -65,7 +71,12 @@ private:
     std::mt19937 rng_{randomDevice_()};
     Distributions distributions_;
 
+    std::shared_ptr<spdlog::logger> logger_;
+
     void InitializePopulation() {
+        if (logger_) {
+            logger_->info("iteration, mse, noParents, noOffspring, strategy");
+        }
         auto& parents = population_.parents;
 
         std::generate(parents.begin(), parents.end(), [&] {
@@ -162,6 +173,25 @@ private:
         }
         stopConditions_.mse = population_.sorted.begin()->first;
         population_.sorted.clear();
+    }
+
+    void LogCurrentIteration() {
+        if (logger_) {
+            logger_->info("{}, {:.4f}, {}, {}, {}",
+                          stopConditions_.iteration,
+                          stopConditions_.mse,
+                          population_.noParents,
+                          population_.noOffspring,
+                          magic_enum::enum_name(population_.strategyType));
+        }
+    }
+
+    void LogResults() {
+        if (logger_) {
+            std::stringstream results;
+            results << population_.parents[0];
+            logger_->info("\n{}", results.str());
+        }
     }
 };
 } // namespace ES

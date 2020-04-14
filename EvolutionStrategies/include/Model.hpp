@@ -1,9 +1,9 @@
 #ifndef EVOLUTIONARYALGORITHMS_MODEL_HPP
 #define EVOLUTIONARYALGORITHMS_MODEL_HPP
 
-#include "spdlog/fmt/fmt.h"
 #include <filesystem>
 #include <fstream>
+#include <spdlog/fmt/fmt.h>
 
 namespace ES {
 enum ModelIO : std::size_t { in, out };

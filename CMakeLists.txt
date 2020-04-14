@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SPDLOG_DIR external/spdlog)
 set(MATPLOTLIB_DIR external/matplotlib-cpp)
+set(MAGIC_ENUM_DIR external/magic_enum)
 set(TIMER_DIR external/Timer)
 
 set(VER 2)
@@ -38,6 +39,7 @@ add_compile_options(
 include_directories(SYSTEM
     ${SPDLOG_DIR}/include
     ${MATPLOTLIB_DIR}
+    ${MAGIC_ENUM_DIR}/include
     ${TIMER_DIR}
     ${Python${VER}_INCLUDE_DIRS}
     ${Python${VER}_NumPy_INCLUDE_DIRS}
