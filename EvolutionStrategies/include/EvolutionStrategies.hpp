@@ -62,6 +62,7 @@ private:
     static constexpr double n_ = noCoefficients;
     static constexpr double tau1_ = 1.0 / CtSqrt(2.0 * n_);
     static constexpr double tau2_ = 1.0 / CtSqrt(2.0 * CtSqrt(n_));
+    static constexpr double offset_ = 0.0001;
 
     Model::Type model_;
     Population<noCoefficients> population_;
@@ -166,7 +167,8 @@ private:
         std::generate(parents.begin(), parents.end(), [&] {
             return (it++)->second;
         });
-        if (population_.sorted.begin()->first == stopConditions_.mse) {
+        if (std::fabs(population_.sorted.begin()->first -
+                      stopConditions_.mse) <= offset_) {
             stopConditions_.noConsecutiveSameMse++;
         } else {
             stopConditions_.noConsecutiveSameMse = 0;

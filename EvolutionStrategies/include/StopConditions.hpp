@@ -13,7 +13,7 @@ struct StopConditions {
     bool notAchieved() {
         return mse >= mseThreshold &&
                noConsecutiveSameMse < maxConsecutiveSameMse &&
-               iteration++ < maxIterations;
+               ++iteration < maxIterations;
     };
 } defaultStop;
 } // namespace ES
