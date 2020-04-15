@@ -12,7 +12,7 @@ auto FirstTask(const ES::Model::Type& model) {
     Timer timer;
     ES::EvolutionStrategies<noCoefficients> strategies{
         model,
-        {200, 6, ES::StrategyType::offspring},
+        {100, 6, ES::StrategyType::parentsAndOffspring},
         {0.3, 10, 1000}};
     return strategies.GetResults();
 }
@@ -37,11 +37,11 @@ void SecondTask(const ES::Model::Type& model) {
                                              1048576 * 5,
                                              1,
                                              true);
-    Timer timer;
     std::vector<std::size_t> parents{2, 5, 10, 50, 100, 500};
     std::vector<ES::StrategyType> strategies{
         ES::StrategyType::parentsAndOffspring,
         ES::StrategyType::offspring};
+    Timer timer;
     std::for_each(parents.begin(), parents.end(), [&](auto parent) {
         std::for_each(strategies.begin(), strategies.end(), [&](auto strat) {
             return ES::EvolutionStrategies<noCoefficients>{model,
@@ -50,6 +50,27 @@ void SecondTask(const ES::Model::Type& model) {
                                                            logger};
         });
     });
+}
+
+template<std::size_t noCoefficients>
+void MultipleTests(const ES::Model::Type& model, const std::size_t noTests) {
+    std::vector<ES::StrategyType> strategies{
+        ES::StrategyType::parentsAndOffspring,
+        ES::StrategyType::offspring};
+    Timer timer;
+    auto logger = spdlog::rotating_logger_mt("comparison",
+                                             "logs/comparison.csv",
+                                             1048576 * 5,
+                                             1,
+                                             true);
+    for (std::size_t test = 0; test < noTests; test++) {
+        std::for_each(strategies.begin(), strategies.end(), [&](auto strat) {
+            return ES::EvolutionStrategies<noCoefficients>{model,
+                                                           {500, 6, strat},
+                                                           {0.3, 10, 1000},
+                                                           logger};
+        });
+    }
 }
 
 int main() {
@@ -61,5 +82,6 @@ int main() {
               << "number of iterations: " << iterations << '\n';
     PlotResults<noCoefficients>(model, results);
     SecondTask<noCoefficients>(model);
+    MultipleTests<noCoefficients>(model, 10);
     return 0;
 }
