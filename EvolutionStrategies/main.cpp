@@ -12,7 +12,7 @@ auto FirstTask(const ES::Model::Type& model) {
     Timer timer;
     ES::EvolutionStrategies<noCoefficients> strategies{
         model,
-        {100, 6, ES::StrategyType::parentsAndOffspring},
+        {100, 6, ES::StrategyType::offspring},
         {0.3, 10, 1000}};
     return strategies.GetResults();
 }

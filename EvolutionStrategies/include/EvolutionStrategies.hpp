@@ -100,8 +100,9 @@ private:
         std::generate(random[coeffs].begin(), random[coeffs].end(), [&] {
             return distributions_.child(rng_, params{0, child[stddevs][i++]});
         });
+        const auto randomScalar = distributions_.standard(rng_);
         std::generate(random[stddevs].begin(), random[stddevs].end(), [&] {
-            return std::exp(tau1_ * distributions_.standard(rng_)) *
+            return std::exp(tau1_ * randomScalar) *
                    std::exp(tau2_ * distributions_.standard(rng_));
         });
         child += random;
@@ -161,7 +162,12 @@ private:
 
     void ReplacePopulation() {
         auto& parents = population_.parents;
+        auto& parentsEval = population_.parentsEvaluation;
+        auto& offspringEval = population_.offspringEvaluation;
 
+        stopConditions_.currentDiff = std::fabs(
+            *std::min_element(offspringEval.begin(), offspringEval.end()) -
+            *std::min_element(parentsEval.begin(), parentsEval.end()));
         SortPopulation();
         auto it = population_.sorted.begin();
         std::generate(parents.begin(), parents.end(), [&] {
