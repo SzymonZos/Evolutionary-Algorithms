@@ -78,7 +78,8 @@ int main() {
     const auto model = rawModel.GetModel();
     constexpr std::size_t noCoefficients = 3;
     auto [results, mse, iterations] = FirstTask<noCoefficients>(model);
-    std::cout << results << "mse: " << mse << '\n'
+    std::cout << results << '\n'
+              << "mse: " << mse << '\n'
               << "number of iterations: " << iterations << '\n';
     PlotResults<noCoefficients>(model, results);
     SecondTask<noCoefficients>(model);
