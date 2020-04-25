@@ -198,7 +198,7 @@ private:
         if (logger_) {
             std::stringstream results;
             results << population_.parents[0];
-            logger_->info("\n{}", results.str());
+            logger_->info("\n{}\n", results.str());
         }
     }
 };

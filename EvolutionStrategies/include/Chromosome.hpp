@@ -1,8 +1,8 @@
 #ifndef EVOLUTIONARYALGORITHMS_CHROMOSOME_HPP
 #define EVOLUTIONARYALGORITHMS_CHROMOSOME_HPP
 
+#include "GenericOstreamOperators.hpp"
 #include "Math.hpp"
-#include "Operators.hpp"
 #include "Types.hpp"
 #include <initializer_list>
 
@@ -69,7 +69,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& stream,
                                     const Chromosome& data) {
-        stream << "x: " << data.coefficients_;
+        stream << "x: " << data.coefficients_ << '\n';
         stream << "sigma: " << data.standardDeviations_;
         return stream;
     }

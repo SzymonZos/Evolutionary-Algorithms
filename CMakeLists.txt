@@ -7,6 +7,7 @@ set(SPDLOG_DIR external/spdlog)
 set(MATPLOTLIB_DIR external/matplotlib-cpp)
 set(MAGIC_ENUM_DIR external/magic_enum)
 set(TIMER_DIR external/Timer)
+set(OPERATORS_DIR ${PROJECT_SOURCE_DIR}/external/Generic-Ostream-Operators)
 
 set(VER 2)
 find_package(Python${VER} COMPONENTS Development NumPy)
@@ -41,6 +42,7 @@ include_directories(SYSTEM
     ${MATPLOTLIB_DIR}
     ${MAGIC_ENUM_DIR}/include
     ${TIMER_DIR}
+    ${OPERATORS_DIR}
     ${Python${VER}_INCLUDE_DIRS}
     ${Python${VER}_NumPy_INCLUDE_DIRS}
 )

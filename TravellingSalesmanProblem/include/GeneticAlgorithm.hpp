@@ -2,9 +2,10 @@
 #define TRAVELLINGSALESMANPROBLEM_GENETICALGORITHM_HPP
 
 #include "Algorithm.hpp"
+#include "GenericOstreamOperators.hpp"
 #include "Math.hpp"
-#include "Operators.hpp"
 #include "Types.hpp"
+#include <iostream>
 #include <map>
 #include <random>
 #include <tuple>
