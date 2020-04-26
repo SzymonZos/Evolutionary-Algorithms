@@ -47,8 +47,7 @@ private:
     std::size_t tMax_;
     DblMatrix<noAlleles, noAlleles> distanceMatrix_;
 
-    std::random_device randomDevice_{};
-    std::mt19937 rng_{randomDevice_()};
+    std::mt19937 rng_{std::random_device{}()};
     std::uniform_int_distribution<> offspringDist_{0, noOffspring - 1};
     std::uniform_int_distribution<> mutationDist_{0, noAlleles - 1};
     std::uniform_real_distribution<> probabilityDist_{0.0, 1.0};

@@ -68,8 +68,7 @@ private:
     Population<noCoefficients> population_;
     StopConditions stopConditions_;
 
-    std::random_device randomDevice_{};
-    std::mt19937 rng_{randomDevice_()};
+    std::mt19937 rng_{std::random_device{}()};
     Distributions distributions_;
 
     std::shared_ptr<spdlog::logger> logger_;
