@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(EvolutionaryAlgorithms)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set(SPDLOG_DIR external/spdlog)
 set(MATPLOTLIB_DIR external/matplotlib-cpp)
@@ -36,6 +36,16 @@ add_compile_options(
     -Wold-style-cast # Warn if c style cast is performed
     -fconstexpr-depth=1024
 )
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(
+        -stdlib=libc++
+    )
+    add_link_options(
+        -stdlib=libc++
+        -lc++abi
+    )
+endif()
 
 include_directories(SYSTEM
     ${SPDLOG_DIR}/include

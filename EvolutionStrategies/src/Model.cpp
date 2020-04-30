@@ -1,5 +1,6 @@
 #include "Model.hpp"
 #include "spdlog/fmt/fmt.h"
+#include <sstream>
 
 namespace ES {
 Model::Model(std::size_t id) :

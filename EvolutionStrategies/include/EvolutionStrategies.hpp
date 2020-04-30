@@ -9,6 +9,7 @@
 #include <magic_enum.hpp>
 #include <memory>
 #include <spdlog/logger.h>
+#include <sstream>
 #include <tuple>
 
 namespace ES {
