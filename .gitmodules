@@ -13,3 +13,6 @@
 [submodule "external/Generic-Ostream-Operators"]
 	path = external/Generic-Ostream-Operators
 	url = https://github.com/SzymonZos/Generic-Ostream-Operators.git
+[submodule "external/Array"]
+	path = external/Array
+	url = https://github.com/SzymonZos/Array.git

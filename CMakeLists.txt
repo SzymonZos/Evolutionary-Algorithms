@@ -8,6 +8,9 @@ set(MATPLOTLIB_DIR external/matplotlib-cpp)
 set(MAGIC_ENUM_DIR external/magic_enum)
 set(TIMER_DIR external/Timer)
 set(OPERATORS_DIR ${PROJECT_SOURCE_DIR}/external/Generic-Ostream-Operators)
+set(ARRAY_DIR external/Array)
+
+set(TOOLCHAIN_BUILD "${CMAKE_CXX_COMPILER_ID}${CMAKE_BUILD_TYPE}")
 
 set(VER 2)
 find_package(Python${VER} COMPONENTS Development NumPy)
@@ -53,6 +56,7 @@ include_directories(SYSTEM
     ${MAGIC_ENUM_DIR}/include
     ${TIMER_DIR}
     ${OPERATORS_DIR}
+    ${ARRAY_DIR}
     ${Python${VER}_INCLUDE_DIRS}
     ${Python${VER}_NumPy_INCLUDE_DIRS}
 )
@@ -61,3 +65,4 @@ add_subdirectory(${SPDLOG_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${SPDLOG_DIR})
 
 add_subdirectory(TravellingSalesmanProblem)
 add_subdirectory(EvolutionStrategies)
+add_subdirectory(AntSystems)

@@ -8,7 +8,7 @@ target_compile_definitions(EvolutionStrategies PRIVATE
 
 set_target_properties(EvolutionStrategies
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${TOOLCHAIN_BUILD}"
 )
 
 target_include_directories(EvolutionStrategies PRIVATE
