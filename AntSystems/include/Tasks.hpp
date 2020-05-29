@@ -1,5 +1,5 @@
-#ifndef TRAVELLINGSALESMANPROBLEM_TASKS_HPP
-#define TRAVELLINGSALESMANPROBLEM_TASKS_HPP
+#ifndef ANTSYSTEMS_TASKS_HPP
+#define ANTSYSTEMS_TASKS_HPP
 
 #include "AntSystem.hpp"
 #include "Timer.hpp"
@@ -11,22 +11,6 @@
 
 namespace plt = matplotlibcpp;
 
-#define GENETIC_ALGORITHM(noParents, n, mutationProbability) \
-    { \
-        constexpr auto noOffspring = static_cast<std::size_t>((n) * \
-                                                              (noParents)); \
-        GeneticAlgorithm<noOffspring, noAlleles, noParents> algorithm{ \
-            (mutationProbability), \
-            tMax, \
-            distanceMatrix}; \
-        auto [results, minCostValue] = algorithm.GetResult(); \
-        logger->info("{:.4f}, {}, {}, {}", \
-                     minCostValue, \
-                     noParents, \
-                     n, \
-                     mutationProbability); \
-    }
-
 template<std::size_t noAlleles>
 std::tuple<IntArray<noAlleles>, double>
 FirstTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
@@ -35,10 +19,9 @@ FirstTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
     constexpr auto noOffspring = static_cast<std::size_t>(0.8 * noParents);
     const double mutationProbability = 0.1;
     const std::size_t tMax = 1000;
-    GeneticAlgorithm<noOffspring, noAlleles, noParents> algorithm{
-        mutationProbability,
-        tMax,
-        distanceMatrix};
+    AntSystem<noOffspring, noAlleles, noParents> algorithm{mutationProbability,
+                                                           tMax,
+                                                           distanceMatrix};
     return algorithm.GetResult();
 }
 
@@ -54,19 +37,6 @@ void SecondTask(const DblMatrix<noAlleles, noAlleles>& distanceMatrix) {
                                              1,
                                              true);
     logger->info("minCostValue, noParents, n, mutationProbability");
-    for (std::size_t i = 0; i < 10; i++) {
-        for (auto mutationProbability : mutationProbabilityVec) {
-            GENETIC_ALGORITHM(100, 0.5, mutationProbability)
-            GENETIC_ALGORITHM(100, 0.7, mutationProbability)
-            GENETIC_ALGORITHM(100, 0.9, mutationProbability)
-            GENETIC_ALGORITHM(300, 0.5, mutationProbability)
-            GENETIC_ALGORITHM(300, 0.7, mutationProbability)
-            GENETIC_ALGORITHM(300, 0.9, mutationProbability)
-            GENETIC_ALGORITHM(500, 0.5, mutationProbability)
-            GENETIC_ALGORITHM(500, 0.7, mutationProbability)
-            GENETIC_ALGORITHM(500, 0.9, mutationProbability)
-        }
-    }
 }
 
 template<std::size_t noAlleles>
@@ -88,4 +58,4 @@ void PlotFirstTask(const DblArray<noAlleles>& x,
     plt::show();
 }
 
-#endif // TRAVELLINGSALESMANPROBLEM_TASKS_HPP
+#endif // ANTSYSTEMS_TASKS_HPP
