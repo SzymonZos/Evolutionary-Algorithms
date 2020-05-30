@@ -23,7 +23,8 @@ int main() {
     constexpr DblArray<noAlleles> y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
     constexpr auto distanceMatrix = CalculateDistanceMatrix(x, y);
     auto [result, minCostValue] = FirstTask(distanceMatrix);
+    std::cout << result << std::endl << minCostValue;
     PlotFirstTask(x, y, result);
-    SecondTask(distanceMatrix);
+    //    SecondTask(distanceMatrix);
     return 0;
 }

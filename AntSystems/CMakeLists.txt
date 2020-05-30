@@ -15,3 +15,9 @@ set_target_properties(AntSystems
 target_include_directories(AntSystems PRIVATE
     include
 )
+
+target_link_libraries(AntSystems PRIVATE
+    Python${VER}::Python
+    Python${VER}::NumPy
+    spdlog::spdlog
+)
