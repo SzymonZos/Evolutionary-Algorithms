@@ -4,6 +4,7 @@
 #include "GenericOstreamOperators.hpp"
 #include "Math.hpp"
 #include "Types.hpp"
+#include <atomic_ops_stack.h>
 #include <iostream>
 #include <map>
 #include <random>
@@ -23,6 +24,7 @@ public:
     ~AntSystem() = default;
 
     void Run() {
+        std::vector<double> cost;
         CreateInitialPheromoneTrace();
         for (std::size_t i = 0; i < tMax_; i++) {
             for (auto& tour : tours_) {
@@ -42,9 +44,9 @@ public:
                     double notVisited{};
                     DblArray<noAnts> a{};
                     std::vector<double> p;
-                    auto currentCity = j ? visitedCities_[m][j - 1] : m;
+                    auto currentCity = j ? visitedCities_[m][j] : m;
                     for (std::size_t k = 0; k < noAnts; k++) {
-                        if (currentCity != k && !visitedNodes_[m][k]) {
+                        if (!visitedNodes_[m][k]) {
                             notVisited += std::pow(
                                               pheromoneQuantity_[currentCity]
                                                                 [k],
@@ -56,7 +58,7 @@ public:
                         }
                     }
                     for (std::size_t k = 0; k < noAnts; k++) {
-                        if (currentCity != k && !visitedNodes_[m][k]) {
+                        if (!visitedNodes_[m][k]) {
                             a[k] = std::pow(pheromoneQuantity_[currentCity][k],
                                             alpha_) *
                                    std::pow(
@@ -80,24 +82,37 @@ public:
                     }
                     visitedNodes_[m][visited] = true;
                     visitedCities_[m][j + 1] = visited;
-                    tours_[currentCity]
-                          [visited] += distanceMatrix_[currentCity][visited];
-                    tours_[visited]
-                          [currentCity] += distanceMatrix_[currentCity]
-                                                          [visited];
-                }
-                std::size_t dupa{};
-                for (auto& quantity : pheromoneQuantity_) {
-                    quantity *= (1 - evaporationCoeff_);
-                    quantity += tours_[dupa++];
                 }
             }
+            auto costValues = CalculateCostValues(visitedCities_);
+            for (std::size_t m = 0; m < noAnts; m++) {
+                for (std::size_t j = 0; j < noAnts - 1; j++) {
+                    tours_[visitedCities_[m][j]]
+                          [visitedCities_[m][j + 1]] += 1 / costValues[m];
+                    tours_[visitedCities_[m][j + 1]]
+                          [visitedCities_[m][j]] += 1 / costValues[m];
+                }
+                tours_[visitedCities_[m].front()]
+                      [visitedCities_[m].back()] += 1 / costValues[m];
+                tours_[visitedCities_[m].back()]
+                      [visitedCities_[m].front()] += 1 / costValues[m];
+            }
+            std::size_t dupa{};
+            //            std::cout << "DUPA:\n";
+            for (auto& quantity : pheromoneQuantity_) {
+                quantity *= (1 - evaporationCoeff_);
+                quantity += tours_[dupa++];
+                //                std::cout << quantity << std::endl;
+            }
+            cost.push_back(
+                *std::min_element(costValues.begin(), costValues.end()));
         }
         auto costValues = CalculateCostValues(visitedCities_);
         auto index = std::min_element(costValues.begin(), costValues.end());
         minCostValue_ = *index;
         minCostIndex_ = static_cast<std::size_t>(
             std::distance(costValues.begin(), index));
+        std::cout << *std::min_element(cost.begin(), cost.end()) << std::endl;
     }
 
     std::tuple<IntArray<noAnts>, double> GetResult() {
@@ -111,9 +126,9 @@ private:
     std::mt19937 rng_{std::random_device{}()};
     std::uniform_real_distribution<> probabilityDist_{0.0, 1.0};
 
-    static const std::size_t alpha_{1};
-    static const std::size_t beta_{5};
-    constexpr static const double evaporationCoeff_{0.5};
+    static const std::size_t alpha_{2};
+    static const std::size_t beta_{20};
+    constexpr static const double evaporationCoeff_{0.7};
 
     DblMatrix<noAnts, noAnts> pheromoneQuantity_{};
     std::array<std::array<bool, noAnts>, noAnts> visitedNodes_{};
@@ -124,11 +139,11 @@ private:
     std::size_t minCostIndex_{};
 
     void CreateInitialPheromoneTrace() {
-        const double factor{0.2};
+        //        const double factor{0.000000002};
         for (std::size_t i = 0; i < noAnts; i++) {
             for (std::size_t j = 0; j < noAnts; j++) {
                 if (i != j) {
-                    pheromoneQuantity_[j][i] = factor * probabilityDist_(rng_);
+                    pheromoneQuantity_[i][j] = 1 / distanceMatrix_[i][j];
                 }
             }
         }

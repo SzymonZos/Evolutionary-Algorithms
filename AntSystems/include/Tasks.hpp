@@ -14,7 +14,7 @@ namespace plt = matplotlibcpp;
 template<std::size_t noAnts>
 auto FirstTask(const DblMatrix<noAnts, noAnts>& distanceMatrix) {
     Timer timer;
-    const std::size_t tMax = 1000;
+    const std::size_t tMax = 200;
     AntSystem<noAnts> algorithm{tMax, distanceMatrix};
     return algorithm.GetResult();
 }
