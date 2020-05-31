@@ -24,89 +24,13 @@ public:
 
     void Run() {
         CreateInitialPheromoneTrace();
-        for (std::size_t i = 0; i < tMax_; i++) {
-            for (auto& tour : tours_) {
-                for (auto& t : tour) {
-                    t = 0;
-                }
-            }
-            for (auto& tour : visitedNodes_) {
-                for (auto& t : tour) {
-                    t = false;
-                }
-            }
-            for (std::size_t m = 0; m < noAnts; m++) {
-                visitedNodes_[m][m] = true;
-                visitedCities_[m][0] = m;
-                for (std::size_t j = 0; j < noAnts - 1; j++) {
-                    double notVisited{};
-                    DblArray<noAnts> a{};
-                    std::vector<double> p;
-                    auto currentCity = j ? visitedCities_[m][j] : m;
-                    for (std::size_t k = 0; k < noAnts; k++) {
-                        if (!visitedNodes_[m][k]) {
-                            notVisited += std::pow(
-                                              pheromoneQuantity_[currentCity]
-                                                                [k],
-                                              alpha_) *
-                                          std::pow(
-                                              1 / distanceMatrix_[currentCity]
-                                                                 [k],
-                                              beta_);
-                        }
-                    }
-                    for (std::size_t k = 0; k < noAnts; k++) {
-                        if (!visitedNodes_[m][k]) {
-                            a[k] = std::pow(pheromoneQuantity_[currentCity][k],
-                                            alpha_) *
-                                   std::pow(
-                                       1 / distanceMatrix_[currentCity][k],
-                                       beta_) /
-                                   notVisited;
-                        }
-                    }
-                    auto sumA = std::accumulate(a.begin(), a.end(), 0.0);
-                    for (std::size_t k = 0; k < noAnts; k++) {
-                        p.push_back(a[k] / sumA);
-                    }
-                    for (std::size_t k = 1; k < p.size(); k++) {
-                        p[k] += p[k - 1];
-                    }
-                    // SelectNode();
-                    auto randomNumber = probabilityDist_(rng_);
-                    std::size_t visited{};
-                    while (p[visited] < randomNumber) {
-                        visited++;
-                    }
-                    visitedNodes_[m][visited] = true;
-                    visitedCities_[m][j + 1] = visited;
-                }
-            }
-            auto costValues = CalculateCostValues(visitedCities_);
-            for (std::size_t m = 0; m < noAnts; m++) {
-                for (std::size_t j = 0; j < noAnts - 1; j++) {
-                    tours_[visitedCities_[m][j]]
-                          [visitedCities_[m][j + 1]] += 1 / costValues[m];
-                    tours_[visitedCities_[m][j + 1]]
-                          [visitedCities_[m][j]] += 1 / costValues[m];
-                }
-                tours_[visitedCities_[m].front()]
-                      [visitedCities_[m].back()] += 1 / costValues[m];
-                tours_[visitedCities_[m].back()]
-                      [visitedCities_[m].front()] += 1 / costValues[m];
-            }
-            std::size_t dupa{};
-            for (auto& quantity : pheromoneQuantity_) {
-                quantity *= (1 - evaporationCoeff_);
-                quantity += tours_[dupa++];
-            }
-            auto index = std::min_element(costValues.begin(),
-                                          costValues.end());
-            if (*index < minCostValue_) {
-                minCostValue_ = *index;
-                bestRoute_ = visitedCities_[static_cast<std::size_t>(
-                    std::distance(costValues.begin(), index))];
-            }
+        for (std::size_t t = 0; t < tMax_; t++) {
+            TraverseNetwork();
+            CalculateDistance();
+            EvaluateTours();
+            UpdatePheromone();
+            UpdateBestTour();
+            ClearParameters();
         }
     }
 
@@ -128,8 +52,10 @@ private:
     DblMatrix<noAnts, noAnts> pheromoneQuantity_{};
     std::array<std::array<bool, noAnts>, noAnts> visitedNodes_{};
     IntMatrix<noAnts, noAnts> visitedCities_{};
-    DblMatrix<noAnts, noAnts> probabilities_{};
+    std::vector<double> probabilities_{};
     DblMatrix<noAnts, noAnts> tours_{};
+    DblArray<noAnts> distances_{};
+
     double minCostValue_{std::numeric_limits<double>::max()};
     IntArray<noAnts> bestRoute_{};
 
@@ -143,23 +69,114 @@ private:
         }
     }
 
-    void SelectNode() {
-        // roulette wheel
+    void ClearParameters() {
+        for (auto& tour : tours_) {
+            tour = {};
+        }
+        for (auto& node : visitedNodes_) {
+            node = {};
+        }
+        distances_ = {};
     }
 
-    auto CalculateCostValues(const IntMatrix<noAnts, noAnts>& population) {
-        DblArray<noAnts> costValues = {};
+    auto CalculateDecisionTable(const std::size_t ant,
+                                const std::size_t curr) {
+        DblArray<noAnts> a{};
+        double notVisited{};
+        for (std::size_t i = 0; i < noAnts; i++) {
+            if (!visitedNodes_[ant][i]) {
+                notVisited += std::pow(pheromoneQuantity_[curr][i], alpha_) *
+                              std::pow(1 / distanceMatrix_[curr][i], beta_);
+            }
+        }
+        for (std::size_t i = 0; i < noAnts; i++) {
+            if (!visitedNodes_[ant][i]) {
+                a[i] = std::pow(pheromoneQuantity_[curr][i], alpha_) *
+                       std::pow(1 / distanceMatrix_[curr][i], beta_) /
+                       notVisited;
+            }
+        }
+        return a;
+    }
+
+    auto CalculateProbabilities(const DblArray<noAnts>& decisionTable) {
+        const auto decisionSum = std::accumulate(decisionTable.cbegin(),
+                                                 decisionTable.cend(),
+                                                 0.0);
+        for (std::size_t k = 0; k < noAnts; k++) {
+            probabilities_.push_back(decisionTable[k] / decisionSum);
+        }
+        for (std::size_t k = 1; k < probabilities_.size(); k++) {
+            probabilities_[k] += probabilities_[k - 1];
+        }
+    }
+
+    void SelectNode(std::size_t ant, std::size_t nextNode) {
+        const auto randomNumber = probabilityDist_(rng_);
+        const auto index = static_cast<std::size_t>(
+            std::distance(probabilities_.cbegin(),
+                          std::upper_bound(probabilities_.cbegin(),
+                                           probabilities_.cend(),
+                                           randomNumber)));
+        visitedNodes_[ant][index] = true;
+        visitedCities_[ant][nextNode] = index;
+    }
+
+    void TraverseNetwork() {
+        for (std::size_t ant = 0; ant < noAnts; ant++) {
+            visitedNodes_[ant][ant] = true;
+            visitedCities_[ant][0] = ant;
+            for (std::size_t j = 0; j < noAnts - 1; j++) {
+                const auto currentNode = visitedCities_[ant][j];
+                const auto table = CalculateDecisionTable(ant, currentNode);
+                CalculateProbabilities(table);
+                SelectNode(ant, j + 1);
+                probabilities_.clear();
+            }
+        }
+    }
+
+    void CalculateDistance() {
         std::size_t idx = 0;
-        for (auto& chromosome : population) {
-            costValues[idx] += distanceMatrix_[chromosome.front()]
-                                              [chromosome.back()];
-            for (std::size_t i = 0; i < chromosome.size() - 1; i++) {
-                costValues[idx] += distanceMatrix_[chromosome[i]]
-                                                  [chromosome[i + 1]];
+        for (auto& city : visitedCities_) {
+            distances_[idx] += distanceMatrix_[city.front()][city.back()];
+            for (std::size_t i = 0; i < city.size() - 1; i++) {
+                distances_[idx] += distanceMatrix_[city[i]][city[i + 1]];
             }
             idx++;
         }
-        return costValues;
+    }
+
+    void EvaluateTours() {
+        for (std::size_t i = 0; i < noAnts; i++) {
+            for (std::size_t j = 0; j < noAnts - 1; j++) {
+                tours_[visitedCities_[i][j]]
+                      [visitedCities_[i][j + 1]] += 1 / distances_[i];
+                tours_[visitedCities_[i][j + 1]]
+                      [visitedCities_[i][j]] += 1 / distances_[i];
+            }
+            tours_[visitedCities_[i].front()]
+                  [visitedCities_[i].back()] += 1 / distances_[i];
+            tours_[visitedCities_[i].back()]
+                  [visitedCities_[i].front()] += 1 / distances_[i];
+        }
+    }
+
+    void UpdatePheromone() {
+        std::size_t i{};
+        for (auto& quantity : pheromoneQuantity_) {
+            quantity *= (1 - evaporationCoeff_);
+            quantity += tours_[i++];
+        }
+    }
+
+    void UpdateBestTour() {
+        auto index = std::min_element(distances_.begin(), distances_.end());
+        if (*index < minCostValue_) {
+            minCostValue_ = *index;
+            bestRoute_ = visitedCities_[static_cast<std::size_t>(
+                std::distance(distances_.begin(), index))];
+        }
     }
 };
 
