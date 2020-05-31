@@ -18,13 +18,15 @@
 // y = {1, 4, 2, 4.5, 9, 1.5, 11, 8, 10, 7};
 
 int main() {
-    constexpr std::size_t noAlleles = 10;
-    constexpr DblArray<noAlleles> x = {0, 3, 6, 7, 15, 12, 14, 9, 7, 0};
-    constexpr DblArray<noAlleles> y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
+    auto res = FirstTask<50>({5, 1});
+    std::cout << res[0] << std::endl << res[1] << std::endl;
+
+    constexpr std::size_t noAnts = 10;
+    constexpr DblArray<noAnts> x = {0, 3, 6, 7, 15, 12, 14, 9, 7, 0};
+    constexpr DblArray<noAnts> y = {1, 4, 5, 3, 0, 4, 10, 6, 9, 10};
     constexpr auto distanceMatrix = CalculateDistanceMatrix(x, y);
-    auto [result, minCostValue] = FirstTask(distanceMatrix);
+    auto [result, minCostValue] = SecondTask(distanceMatrix);
     std::cout << result << std::endl << minCostValue;
-    PlotFirstTask(x, y, result);
-    //    SecondTask(distanceMatrix);
+    PlotSecondTask(x, y, result);
     return 0;
 }

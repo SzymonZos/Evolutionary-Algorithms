@@ -1,18 +1,25 @@
 #ifndef ANTSYSTEMS_TASKS_HPP
 #define ANTSYSTEMS_TASKS_HPP
 
+#include "AntColony.hpp"
 #include "AntSystem.hpp"
 #include "Timer.hpp"
 #include "Utils.hpp"
 #include "matplotlibcpp.h"
-#include "spdlog/spdlog.h"
 #include <iostream>
-#include <spdlog/sinks/rotating_file_sink.h>
 
 namespace plt = matplotlibcpp;
 
 template<std::size_t noAnts>
-auto FirstTask(const DblMatrix<noAnts, noAnts>& distanceMatrix) {
+auto FirstTask(const DblArray<2>& distanceMatrix) {
+    Timer timer;
+    const std::size_t tMax = 200;
+    AntColony<noAnts> antColony{tMax, distanceMatrix};
+    return antColony.GetResult();
+}
+
+template<std::size_t noAnts>
+auto SecondTask(const DblMatrix<noAnts, noAnts>& distanceMatrix) {
     Timer timer;
     const std::size_t tMax = 200;
     AntSystem<noAnts> algorithm{tMax, distanceMatrix};
@@ -20,21 +27,9 @@ auto FirstTask(const DblMatrix<noAnts, noAnts>& distanceMatrix) {
 }
 
 template<std::size_t noAnts>
-void SecondTask(const DblMatrix<noAnts, noAnts>& distanceMatrix) {
-    Timer timer;
-    auto logger = spdlog::rotating_logger_mt("results logger",
-                                             "logs/results.csv",
-                                             1048576 * 5,
-                                             1,
-                                             true);
-    logger->info("minCostValue, noParents, n, mutationProbability");
-    std::cout << distanceMatrix;
-}
-
-template<std::size_t noAnts>
-void PlotFirstTask(const DblArray<noAnts>& x,
-                   const DblArray<noAnts>& y,
-                   const IntArray<noAnts>& result) {
+void PlotSecondTask(const DblArray<noAnts>& x,
+                    const DblArray<noAnts>& y,
+                    const IntArray<noAnts>& result) {
     std::vector<double> xPlot, yPlot;
     xPlot.reserve(noAnts + 1);
     yPlot.reserve(noAnts + 1);

@@ -4,7 +4,6 @@
 #include "GenericOstreamOperators.hpp"
 #include "Math.hpp"
 #include "Types.hpp"
-#include <atomic_ops_stack.h>
 #include <iostream>
 #include <map>
 #include <random>
@@ -111,7 +110,7 @@ public:
         }
     }
 
-    std::tuple<IntArray<noAnts>, double> GetResult() {
+    std::tuple<IntArray<noAnts>, double> GetResult() const {
         return {bestRoute_, minCostValue_};
     }
 

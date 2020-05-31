@@ -1,5 +1,5 @@
-#ifndef TRAVELLINGSALESMANPROBLEM_UTILS_HPP
-#define TRAVELLINGSALESMANPROBLEM_UTILS_HPP
+#ifndef ANTSYSTEMS_UTILS_HPP
+#define ANTSYSTEMS_UTILS_HPP
 
 #include "Math.hpp"
 #include "Types.hpp"
@@ -16,4 +16,4 @@ constexpr auto CalculateDistanceMatrix(const DblArray<noAlleles>& x,
     return distanceMatrix;
 }
 
-#endif // TRAVELLINGSALESMANPROBLEM_UTILS_HPP
+#endif // ANTSYSTEMS_UTILS_HPP
