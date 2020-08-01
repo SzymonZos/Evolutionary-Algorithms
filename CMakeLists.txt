@@ -46,6 +46,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     )
     add_link_options(
         -stdlib=libc++
+        -fuse-ld=lld
         -lc++abi
     )
 endif()
