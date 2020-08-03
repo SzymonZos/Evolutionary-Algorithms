@@ -15,7 +15,7 @@ class GeneticAlgorithm {
 public:
     GeneticAlgorithm(double mutationProbability,
                      std::size_t tMax,
-                     DblMatrix<noAlleles, noAlleles> distanceMatrix) :
+                     const DblMatrix<noAlleles, noAlleles>& distanceMatrix) :
         mutationProbability_{mutationProbability},
         tMax_{tMax},
         distanceMatrix_{distanceMatrix} {
@@ -38,7 +38,7 @@ public:
                   << " with cost value: " << minCostValue_ << std::endl;
     }
 
-    std::tuple<IntArray<noAlleles>, double> GetResult() {
+    std::tuple<IntArray<noAlleles>, double> GetResult() const {
         return {parents_[0], minCostValue_};
     }
 
@@ -61,7 +61,7 @@ private:
 
     template<std::size_t size>
     auto CalculateCostValues(const IntMatrix<noAlleles, size>& population) {
-        DblArray<size> costValues = {};
+        DblArray<size> costValues{};
         std::size_t idx = 0;
         for (auto& chromosome : population) {
             costValues[idx] += distanceMatrix_[chromosome.front()]
@@ -85,7 +85,7 @@ private:
     }
 
     auto SelectParents() {
-        IntMatrix<noAlleles, noOffspring> chosenParents = {};
+        IntMatrix<noAlleles, noOffspring> chosenParents{};
         auto maxCost = std::max_element(parentCostValues_.begin(),
                                         parentCostValues_.end());
         double ts = std::accumulate(
@@ -135,7 +135,7 @@ private:
 
     template<typename T>
     void GenerateOffspring(T&& parents) {
-        IntArray<2> index = {};
+        IntArray<2> index{};
         for (std::size_t i = 0; i < noOffspring; i += 2) {
             std::generate(index.begin(), index.end(), [&] {
                 return offspringDist_(rng_);
@@ -148,7 +148,7 @@ private:
     }
 
     void MutateOffspring() {
-        IntArray<2> index = {};
+        IntArray<2> index{};
         for (auto& child : offspring_) {
             if (probabilityDist_(rng_) < mutationProbability_) {
                 std::generate(index.begin(), index.end(), [&] {

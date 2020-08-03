@@ -1,5 +1,5 @@
-#ifndef TRAVELLINGSALESMANPROBLEM_MATH_HPP
-#define TRAVELLINGSALESMANPROBLEM_MATH_HPP
+#ifndef EVOLUTIONSTRATEGIES_MATH_HPP
+#define EVOLUTIONSTRATEGIES_MATH_HPP
 
 #include <cmath>
 
@@ -19,4 +19,4 @@ constexpr T CtSqrt(T x) {
     return std::numeric_limits<T>::quiet_NaN();
 }
 
-#endif // TRAVELLINGSALESMANPROBLEM_MATH_HPP
+#endif // EVOLUTIONSTRATEGIES_MATH_HPP
