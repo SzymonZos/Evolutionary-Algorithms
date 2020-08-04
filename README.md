@@ -44,7 +44,7 @@ and p<sub>m</sub> - {0.1, 0.3, 0.5}.
 
 #### Algorithm
 
-Denoting the population in iteration t as $P_{µ}^{(t)}$
+Denoting the population in iteration t as $$P_{µ}^{(t)}$$
 
 #### Task
 
