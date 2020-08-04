@@ -13,7 +13,7 @@ TODO
 1. Create an initial population of P chromosomes (parents population).
 2. Evaluate the cost (the total distance to be traveled) of each individual.
 3. Choose n * P parents from the current population via proportional selection,
-where n → (0,1].
+where n - (0,1].
 4. Select randomly two parents to create offspring using crossover operator.
 5. Repeat the Step 4 until n * P offspring are generated.
 6. Apply mutation operators for changes in randomly selected offspring.
@@ -42,7 +42,18 @@ and p<sub>m</sub> - {0.1, 0.3, 0.5}.
 
 ### Evolution Strategies
 
-TODO
+#### Algorithm
+
+Denoting the population in iteration t as $P_{µ}^{(t)}$
+
+#### Task
+
+Write a computer program to solve the optimization problem provided by a tutor
+using the Evolution Strategy. Implement both, (µ, λ) and (µ + λ) approaches.
+As the population varying operator only mutation should be used. Evaluate the
+influence of the ES parameters (number of individuals, number of offspring,
+selection and crossover method, etc.) on the performance and the time of
+computations.
 
 ### Ant Systems
 
@@ -55,50 +66,52 @@ TODO
 ### Windows specific black magic
 
 1. [Download](https://www.python.org/downloads/release/python-2717/)
-desired Python2.7 version and install these modules.
+desired ```Python 2.7``` version and install these modules.
    ```shell script
    pip2 install numpy matplotlib
    ```
 
 2. Follow [this 
 guide](https://github.com/orlp/dev-on-windows/wiki/Installing-GCC--&-MSYS2)
-to install desired toolchain (MinGW).
+to install desired toolchain ```MinGW```. Note that CMake 3.16 comes with great
+opportunity to lose developer's mind under Windows. A nice feature that prevents
+CMake from working was added there. One **cannot** include *sh.exe* in the path.
+To solve this issue simply use one of newer versions (3.17 was tested and
+worked quite nicely).
 
-3. To successfully run MinGW toolchain:
-   * One **cannot** have included *sh.exe* in the path. Usually it comes with
-   git modules to support git bash.
-   * It has to be run from *cmd* or *PowerShell*.
-
-4. Using **MSYS2** shell execute following commands in the desired directory
+3. Using ```MSYS2``` shell execute following commands in the desired directory.
    ```shell script
    git clone https://github.com/SzymonZos/Evolutionary-Algorithms.git
    cd Evolutionary-Algorithms
    git submodule update --init --recursive
    ```
 
-5. Then run following commands using **cmd** from Evolutionary-Algorithms\ directory
+4. Then run following commands using ```cmd``` from Evolutionary-Algorithms
+ directory.
    ```shell script
-   mkdir TravellingSalesmanProblem\build
-   cd TravellingSalesmanProblem\build
-   cmake ..
-   mingw32-make
-   ..\bin\TravellingSalesmanProblem.exe
+   mkdir build
+   cd build
+   cmake -G "MinGW Makefiles" ..
+   cmake --build .
    ```
+
+5. Choose desired built binary and run it.
 
 ### Normal operating systems
 
-1. Install Python 2.7 using your package manager.
- Unfortunately Python 3 does not cooperate well.
+1. Install Python ```2.7``` using your package manager. Unfortunately 
+```Python 3``` does not cooperate well.
 
-2. Then run following commands
+2. Run following commands. Note that default system generator, compiler and
+build type are chosen in this way. To change this behavior, proceed with
+standard CMake command ```-D```.
    ```shell script
    pip2 install numpy matplotlib
    git clone https://github.com/SzymonZos/Evolutionary-Algorithms.git
-   cd Evolutionary-Algorithms/
+   cd Evolutionary-Algorithms
    git submodule update --init --recursive
-   mkdir TravellingSalesmanProblem/build/
-   cd TravellingSalesmanProblem/build/
+   mkdir build
+   cd build
    cmake ..
-   make
-   ../bin/TravellingSalesmanProblem
+   cmake --build . 
    ```
