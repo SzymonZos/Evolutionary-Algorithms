@@ -2,7 +2,11 @@
 
 ## Introduction
 
-TODO
+This repository consists of three implementations of evolutionary algorithms:
+
+* Genetic Algorithm for Traveling Salesman Problem
+* Evolution Strategies
+* Ant Systems
 
 ## Description
 
@@ -115,11 +119,61 @@ population according to uniform distribution −10 ≤ a, b, c ≤ 10,
 
 ### Ant Systems
 
-TODO
+#### Algorithm
+
+Ant System is one of many variants of ant colony optimization algorithms. In
+this approach solutions are constructed by moving m artificial ants on the
+problem graph. The ants build a tour visiting n = N cities using a stochastic
+decision rule presented later. After a complete tour is constructed the
+artificial ants deposit the pheromone trail (update a variable associated with
+each arc). The amount of pheromone τ<sub>ij</sub>(t) deposed in iteration t on
+arc (i, j) represents the desirability to move from city i to city j. The
+quantity of pheromone deposed by every ant is proportional to the quality of
+the solution found. The internal memory of each ant contains the list of already
+visited cities and is used to identify the details of the chosen path. By
+exploiting its memory an ant k can build a set of feasible solutions.
+
+The ant decision in node *i* is based on a decision table **A**<sub>i</sub> =
+\[a<sub>ij</sub>(t)\]<sub>\[N<sub>i</sub>\]</sub> obtained using the following
+rule: a<sub>ij</sub>(t) = (τ<sub>ij</sub>(t))<sup>α</sup> * 
+(η<sub>ij</sub>)<sup>β</sup> / sum<sub>l∈N<sub>i</sub><sup>k</sup></sub>
+((τ<sub>ij</sub>(t))<sup>α</sup> * (η<sub>ij</sub>)<sup>β</sup>), ∀j ∈ 
+N<sub>i</sub>, where τ<sub>ij</sub> is the amount of pheromone on arc (i, j)
+at time t, η<sub>ij</sub> = 1/d<sub>ij</sub>, N<sub>i</sub> is the set of
+neighbors cities of city i, N<sub>i</sub><sup>k</sup> ⊆ N<sub>i</sub> is a set
+of neighbor cities of city i that ant k has not visited yet, and α and β are
+control parameters.
+
+The ant *k* chooses to go from city *i* to city *j* ∈ N<sub>i</sub><sup>k</sup>
+with probability p<sub>ij</sub><sup>k</sup> = a<sub>ij</sub>(t) /
+sum<sub>l∈N<sub>i</sub><sup>k</sup></sub>a<sub>ij</sub>(t). After all m ants
+have completed their tour the deposition and evaporation of pheromone mechanism
+is started. This mechanism can be described by the formula τ<sub>ij</sub>(t + 1)
+= (1 − ρ)τ<sub>ij</sub>(t) + ∆τ<sub>ij</sub>(t), where ρ ∈ [0, 1] is the
+pheromone evaporation coefficient, and the total quantity of pheromone 
+∆τ<sub>ij</sub>(t) deposed on arc (i, j) is specified by ∆τ<sub>ij</sub>(t) =
+sum<sub>k=1</sub><sup>m</sup>∆τ<sub>ij</sub><sup>k</sup>(t). The quantity of
+pheromone ∆τ<sub>ij</sub><sup>k</sup>(t) deposed by ant *k* on arc (i, j) (that
+it has used) is equal to 1 / L<sup>k</sup>(t) if (i, j) ∈ T<sup>k</sup>(t) else
+0, where L<sup>k</sup>(t) is the length of the tour T<sup>k</sup>(t) made by
+the k-th ant.
+
+Before the start of the optimization algorithm a small amount of pheromone
+τ<sup>0</sup> > 0 is deposed on all arcs τ<sub>ij</sub><sup>k</sup>(0) =
+τ<sub>0</sub>. A good choice for parameter values is m = n, α = 1, β = 5 and
+ρ = 0.5 but the optimal set depends on the investigated problem.
+
+#### Tasks
+
+1. Write a computer program simulating the ants colony behavior in an environment
+where the nest and the food are separated by a double, asymmetric bridge.
+2. Implement the Ant System to solve the traveling salesman problem. Use a map
+of cities provided by a tutor, m = N = 10, the maximum number of tours 
+Tmax = 200. What was the minimal total distance traveled? What is the sequence
+of cities to be visited ensuring the minimal total distance traveled? Show the
+results in a graphic form (as a network of connections).
 
 ## Installation
-
-TODO
 
 ### Windows specific black magic
 
