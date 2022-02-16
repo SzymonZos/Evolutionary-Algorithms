@@ -1,3 +1,5 @@
+#include <cxxopts.hpp>
+
 #include "Tasks.hpp"
 
 // Test data
@@ -17,7 +19,26 @@
 // x = {3, 2, 12, 7, 9, 3, 16, 11, 9, 2};
 // y = {1, 4, 2, 4.5, 9, 1.5, 11, 8, 10, 7};
 
-int main() {
+auto parse_args(int argc, char** argv) {
+    try {
+        cxxopts::Options options(argv[0], "Ant systems");
+        options.positional_help("[optional args]").show_positional_help();
+
+        // clang-format off
+        options
+            .allow_unrecognised_options()
+            .add_options()
+                ("p,plot", "Enable plotting");
+        // clang-format on
+        return options.parse(argc, argv);
+    } catch (const cxxopts::OptionException& e) {
+        std::cout << "error parsing options: " << e.what() << std::endl;
+        std::exit(1);
+    }
+}
+
+int main(int argc, char** argv) {
+    auto options = parse_args(argc, argv);
     auto res = FirstTask<50>({5, 1});
     std::cout << res[0] << std::endl << res[1] << std::endl;
 
@@ -27,6 +48,8 @@ int main() {
     constexpr auto distanceMatrix = CalculateDistanceMatrix(x, y);
     auto [result, minCostValue] = SecondTask(distanceMatrix);
     std::cout << result << std::endl << minCostValue;
-    PlotSecondTask(x, y, result);
+    if (options.count("plot")) {
+        PlotSecondTask(x, y, result);
+    }
     return 0;
 }

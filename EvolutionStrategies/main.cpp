@@ -2,6 +2,7 @@
 #include "Model.hpp"
 #include "Timer.hpp"
 #include "matplotlibcpp.h"
+#include <cxxopts.hpp>
 #include <iostream>
 #include <spdlog/sinks/rotating_file_sink.h>
 
@@ -73,7 +74,26 @@ void MultipleTests(const ES::Model::Type& model, const std::size_t noTests) {
     }
 }
 
-int main() {
+auto parse_args(int argc, char** argv) {
+    try {
+        cxxopts::Options options(argv[0], "Evolution strategies");
+        options.positional_help("[optional args]").show_positional_help();
+
+        // clang-format off
+        options
+            .allow_unrecognised_options()
+            .add_options()
+                ("p,plot", "Enable plotting");
+        // clang-format on
+        return options.parse(argc, argv);
+    } catch (const cxxopts::OptionException& e) {
+        std::cout << "error parsing options: " << e.what() << std::endl;
+        std::exit(1);
+    }
+}
+
+int main(int argc, char** argv) {
+    auto options = parse_args(argc, argv);
     ES::Model rawModel{9};
     const auto model = rawModel.GetModel();
     constexpr std::size_t noCoefficients = 3;
@@ -81,7 +101,9 @@ int main() {
     std::cout << results << '\n'
               << "mse: " << mse << '\n'
               << "number of iterations: " << iterations << '\n';
-    PlotResults<noCoefficients>(model, results);
+    if (options.count("plot")) {
+        PlotResults<noCoefficients>(model, results);
+    }
     SecondTask<noCoefficients>(model);
     MultipleTests<noCoefficients>(model, 10);
     return 0;

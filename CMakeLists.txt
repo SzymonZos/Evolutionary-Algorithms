@@ -9,6 +9,7 @@ set(MAGIC_ENUM_DIR external/magic_enum)
 set(TIMER_DIR external/Timer)
 set(OPERATORS_DIR ${PROJECT_SOURCE_DIR}/external/Generic-Ostream-Operators)
 set(ARRAY_DIR external/Array)
+set(CXXOPTS_DIR external/cxxopts)
 
 set(TOOLCHAIN_BUILD "${CMAKE_CXX_COMPILER_ID}${CMAKE_BUILD_TYPE}")
 
@@ -58,6 +59,7 @@ include_directories(SYSTEM
     ${TIMER_DIR}
     ${OPERATORS_DIR}
     ${ARRAY_DIR}
+    ${CXXOPTS_DIR}/include
     ${Python${VER}_INCLUDE_DIRS}
     ${Python${VER}_NumPy_INCLUDE_DIRS}
 )
