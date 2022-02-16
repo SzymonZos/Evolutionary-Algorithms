@@ -42,3 +42,6 @@ jobs:
           . ./venv/bin/activate &&
           cmake --build ./build
           --config ${{matrix.build_type}} -- -j $(nproc)
+
+      - name: Main app
+        run: ./ci/run_main_apps.sh
